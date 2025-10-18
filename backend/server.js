@@ -1,7 +1,8 @@
 import express from "express";
 import cors from "cors";
+import { ObjectId } from "mongodb";
 import { MongoClient } from "mongodb";
-import fs from "fs";
+// import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 // Tạo __dirname giống CommonJS
@@ -53,7 +54,31 @@ app.get("/api/staff", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
+//
+// Xóa nhân viên
+app.get("/quanly/delete/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await staffCollection.deleteOne({ _id: new ObjectId(id) });
+    if (result.deletedCount === 1) {
+      // res.send(
+      //   `<script>alert('Xóa nhân viên thành công'); window.location.href='/quanly';</script>`
+      // );
+      res.json({ success: true, message: "Xóa nhân viên thành công" });
+    } else {
+      // res.send(
+      //   `<script>alert('Không tìm thấy nhân viên'); window.location.href='/quanly';</script>`
+      // );
+      res.json({ success: false, message: "Không tìm thấy nhân viên" });
+    }
+  } catch (err) {
+    console.error(err);
+    // res.send(
+    //   `<script>alert('Lỗi server'); window.location.href='/quanly';</script>`
+    // );
+    res.status(500).json({ success: false, message: "Lỗi server" });
+  }
+});
 // ✅ Chạy server
 const PORT = 5000;
 app.listen(PORT, () => {
