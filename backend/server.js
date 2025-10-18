@@ -79,6 +79,33 @@ app.get("/quanly/delete/:id", async (req, res) => {
     res.status(500).json({ success: false, message: "Lỗi server" });
   }
 });
+// EDIT NHÂN VIÊN (PUT)
+app.put("/quanly/edit/:id", async (req, res) => {
+  const { id } = req.params;
+  const updateData = req.body; // { name, rank, position, licensePlate }
+
+  try {
+    const result = await staffCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updateData }
+    );
+
+    if (result.modifiedCount === 1) {
+      res.json({ success: true, message: "Cập nhật thành công" });
+    } else {
+      res.json({
+        success: false,
+        message: "Không tìm thấy nhân viên hoặc không thay đổi gì",
+      });
+    }
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .json({ success: false, message: "Lỗi server khi cập nhật" });
+  }
+});
+//
 // ✅ Chạy server
 const PORT = 5000;
 app.listen(PORT, () => {
