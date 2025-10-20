@@ -1,51 +1,111 @@
-<div
-  class="col-12 d-flex mb-3 gap-3 justify-content-between text-center w-3/4 g-6"
->
-  <div class="col-4" style="padding: 0 50px">
-    <button
-      class="btn text-uppercase"
-      style="background: rgb(77, 47, 185); text-align: center"
-    >
-      thông tin xe
-    </button>
-  </div>
-
-  <div class="col-4" style="padding: 0 50px">
-    <button
-      class="btn text-uppercase"
-      style="background: rgb(77, 47, 185); text-align: center"
-    >
-      thông tin xe vào
-    </button>
-  </div>
-  <div class="col-4" style="padding: 0 50px">
-    <button
-      class="btn text-uppercase"
-      style="background: rgb(77, 47, 185); text-align: center"
-    >
-      thông tin xe ra
-    </button>
-  </div>
-</div>
-<table class="" style="width: 100%">
+<table style="width: 100%; table-layout: fixed">
   <thead>
-    <tr>
-      <th scope="col">1</th>
-      <th scope="col">2</th>
-      <th scope="col">3</th>
-      <th scope="col">4</th>
-      <th scope="col">5</th>
-      <th scope="col">6</th>
-      <th scope="col"></th>
+    <tr class="w-100">
+      <th>ngày</th>
+      <th>giờ</th>
+      <th>biển số</th>
+      <th>tên</th>
+      <th>chức vụ</th>
+      <th>trạng thái</th>
+      <th>điều chỉnh</th>
     </tr>
   </thead>
 
   <tbody id="table_body">
     <tr>
-      <td>1</td>
-      <td>29A-12345</td>
-      <td>12:00 01/01/2023</td>
-      <td>helo</td>
+      <td>
+        <input
+          type="date"
+          name="date"
+          class="form-control edit"
+          value="1"
+          readonly
+        />
+      </td>
+      <td>
+        <input
+          name="time"
+          type="time"
+          class="form-control edit"
+          value="29A-12345"
+          readonly
+        />
+      </td>
+      <td>
+        <input
+          type="text"
+          name="plate"
+          class="form-control edit"
+          value="2023-01-01T12:00"
+          readonly
+        />
+      </td>
+      <td>
+        <input
+          type="text"
+          name="employee"
+          class="form-control edit"
+          value="helo"
+          readonly
+        />
+      </td>
+      <td class="">
+        <input
+          type="text"
+          name="chuc_vu"
+          class="form-control edit"
+          value=""
+          readonly
+        />
+      </td>
+      <td>
+        <input
+          type="text"
+          name="status"
+          class="form-control edit"
+          value="2023-01-01T12:30"
+          readonly
+        />
+      </td>
+      <td class="hide">
+        <input
+          type="datetime-local"
+          class="form-control edit hide"
+          value=""
+          readonly
+        />
+      </td>
+      <td class="hide">
+        <input
+          type="datetime-local"
+          class="form-control edit hide"
+          value=""
+          readonly
+        />
+      </td>
+      <td class="hide">
+        <input
+          type="datetime-local"
+          class="form-control edit hide"
+          value=""
+          readonly
+        />
+      </td>
+      <td class="d-flex align-items-center justify-content-between">
+        <span class="form-control bg-danger">trạng thái</span>
+        <button
+          class="btn ms-2 delete-btn text-uppercase px-3 ms-2"
+          style="padding: 4px 16px; background-color: red"
+        >
+          xoá
+        </button>
+        <button
+          class="btn btn-primary ms-2 edit-btn text-uppercase"
+          style="padding: 4px 16px"
+        >
+          Sửa
+        </button>
+      </td>
     </tr>
   </tbody>
 </table>
