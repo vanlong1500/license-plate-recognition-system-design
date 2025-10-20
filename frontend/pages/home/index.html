@@ -1,202 +1,374 @@
 <!DOCTYPE html>
 <html dir="ltr" lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <!-- Tell the browser to be responsive to screen width -->
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="" />
-    <meta name="author" content="" />
-    <!-- Favicon icon -->
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="16x16"
-      href="../../assets/images/favicon.png"
-    />
-    <title>
-      Nice admin Template - The Ultimate Multipurpose admin template
-    </title>
-    <!-- Custom CSS -->
-    <link
-      href="../../assets/libs/chartist/dist/chartist.min.css"
-      rel="stylesheet"
-    />
-    <!-- Custom CSS -->
-    <link href="../../dist/css/style.min.css" rel="stylesheet" />
-  </head>
 
-  <body>
-    <!-- ============================================================== -->
-    <!-- Preloader - style you can find in spinners.css -->
-    <!-- ============================================================== -->
-    <div class="preloader">
-      <div class="lds-ripple">
-        <div class="lds-pos"></div>
-        <div class="lds-pos"></div>
-      </div>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <!-- Tell the browser to be responsive to screen width -->
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+  <!-- Favicon icon -->
+  <link rel="icon" type="image/png" sizes="16x16" href="../../assets/images/favicon.png" />
+  <title>
+    Trang chủ - Hệ thống quản lý bãi xe
+  </title>
+
+  <!-- Custom CSS -->
+  <link href="../../dist/css/style.min.css" rel="stylesheet" />
+
+  <!-- Custom CSS cho camera -->
+  <style>
+    .camera-container {
+      position: relative;
+    }
+
+    .camera-frame {
+      position: relative;
+      background: #000;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .camera-video {
+      width: 100%;
+      height: 450px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .camera-overlay {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      z-index: 10;
+    }
+
+    .camera-status {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 15px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .camera-status.online {
+      background: rgba(40, 167, 69, 0.9);
+      color: white;
+    }
+
+    .camera-status.offline {
+      background: rgba(220, 53, 69, 0.9);
+      color: white;
+    }
+
+    .camera-controls {
+      text-align: center;
+    }
+
+    .font-30 {
+      font-size: 30px;
+    }
+
+    .card.bg-primary,
+    .card.bg-success,
+    .card.bg-danger,
+    .card.bg-warning {
+      border: none;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+  </style>
+</head>
+
+<body>
+  <!-- ============================================================== -->
+  <!-- Preloader - style you can find in spinners.css -->
+  <!-- ============================================================== -->
+  <div class="preloader">
+    <div class="lds-ripple">
+      <div class="lds-pos"></div>
+      <div class="lds-pos"></div>
     </div>
+  </div>
+  <!-- ============================================================== -->
+  <!-- Main wrapper - style you can find in pages.scss -->
+  <!-- ============================================================== -->
+  <div id="main-wrapper" data-navbarbg="skin6" data-theme="light" data-layout="vertical" data-sidebartype="full"
+    data-boxed-layout="full">
     <!-- ============================================================== -->
-    <!-- Main wrapper - style you can find in pages.scss -->
+    <!-- Topbar header - style you can find in pages.scss -->
     <!-- ============================================================== -->
-    <div
-      id="main-wrapper"
-      data-navbarbg="skin6"
-      data-theme="light"
-      data-layout="vertical"
-      data-sidebartype="full"
-      data-boxed-layout="full"
-    >
-      <!-- ============================================================== -->
-      <!-- Topbar header - style you can find in pages.scss -->
-      <!-- ============================================================== -->
 
+    <!-- ============================================================== -->
+    <!-- End Topbar header -->
+    <!-- ============================================================== -->
+    <!-- ============================================================== -->
+    <!-- Left Sidebar - style you can find in sidebar.scss  -->
+    <!-- ============================================================== -->
+    <aside class="left-sidebar" style="padding-top: 0" data-sidebarbg="skin5">
+      <!-- Sidebar scroll-->
+      <div class="scroll-sidebar">
+        <!-- Sidebar navigation-->
+        <nav class="sidebar-nav">
+          <ul id="sidebarnav">
+            <li class="sidebar-item">
+              <a class="sidebar-link waves-effect waves-dark sidebar-link" href="index.html" aria-expanded="false">
+                <i class="mdi mdi-av-timer"></i>
+                <span class="hide-menu">Trang chủ</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link waves-effect waves-dark sidebar-link" href="../quanly/quanly.html"
+                aria-expanded="false">
+                <i class="mdi mdi-account-network"></i>
+                <span class="hide-menu">Quản lý nhân viên</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link waves-effect waves-dark sidebar-link" href="../thongke/thongke.html"
+                aria-expanded="false">
+                <i class="mdi mdi-arrange-bring-forward"></i>
+                <span class="hide-menu">Thống kê</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <!-- End Sidebar navigation -->
+      </div>
+      <!-- End Sidebar scroll-->
+    </aside>
+    <!-- ============================================================== -->
+    <!-- End Left Sidebar - style you can find in sidebar.scss  -->
+    <!-- ============================================================== -->
+    <!-- ============================================================== -->
+    <!-- Page wrapper  -->
+    <!-- ============================================================== -->
+    <div class="page-wrapper">
       <!-- ============================================================== -->
-      <!-- End Topbar header -->
+      <!-- Bread crumb and right sidebar toggle -->
       <!-- ============================================================== -->
-      <!-- ============================================================== -->
-      <!-- Left Sidebar - style you can find in sidebar.scss  -->
-      <!-- ============================================================== -->
-      <aside class="left-sidebar" style="padding-top: 0" data-sidebarbg="skin5">
-        <!-- Sidebar scroll-->
-        <div class="scroll-sidebar">
-          <!-- Sidebar navigation-->
-          <nav class="sidebar-nav">
-            <ul id="sidebarnav">
-              <li class="sidebar-item">
-                <a
-                  class="sidebar-link waves-effect waves-dark sidebar-link"
-                  href="index.html"
-                  aria-expanded="false"
-                >
-                  <i class="mdi mdi-av-timer"></i>
-                  <span class="hide-menu">Trang chủ</span>
-                </a>
-              </li>
-              <li class="sidebar-item">
-                <a
-                  class="sidebar-link waves-effect waves-dark sidebar-link"
-                  href="../quanly/quanly.html"
-                  aria-expanded="false"
-                >
-                  <i class="mdi mdi-account-network"></i>
-                  <span class="hide-menu">Quản lý nhân viên</span>
-                </a>
-              </li>
-              <li class="sidebar-item">
-                <a
-                  class="sidebar-link waves-effect waves-dark sidebar-link"
-                  href="../thongke/thongke.html"
-                  aria-expanded="false"
-                >
-                  <i class="mdi mdi-arrange-bring-forward"></i>
-                  <span class="hide-menu">Thống kê</span>
-                </a>
-              </li>
-            </ul>
-          </nav>
-          <!-- End Sidebar navigation -->
-        </div>
-        <!-- End Sidebar scroll-->
-      </aside>
-      <!-- ============================================================== -->
-      <!-- End Left Sidebar - style you can find in sidebar.scss  -->
-      <!-- ============================================================== -->
-      <!-- ============================================================== -->
-      <!-- Page wrapper  -->
-      <!-- ============================================================== -->
-      <div class="page-wrapper">
-        <!-- ============================================================== -->
-        <!-- Bread crumb and right sidebar toggle -->
-        <!-- ============================================================== -->
-        <div class="page-breadcrumb">
-          <div class="w-100">
-            <p
-              class="pl-3 text-uppercase"
-              style="font-size: 30px; color: black"
-            >
-              camera
-            </p>
-
-            <div id="show_camera"></div>
-            <div
-              class="col-12 d-flex mb-3 gap-3 justify-content-between text-center w-3/4 g-6"
-            >
-              <div class="col-4" style="padding: 0 50px">
-                <button
-                  class="btn text-uppercase"
-                  style="background: rgb(77, 47, 185); text-align: center"
-                >
-                  thông tin xe
-                </button>
-              </div>
-
-              <div class="col-4" style="padding: 0 50px">
-                <button
-                  class="btn text-uppercase"
-                  style="background: rgb(77, 47, 185); text-align: center"
-                >
-                  thông tin xe vào
-                </button>
-              </div>
-              <div class="col-4" style="padding: 0 50px">
-                <button
-                  class="btn text-uppercase"
-                  style="background: rgb(77, 47, 185); text-align: center"
-                >
-                  thông tin xe ra
-                </button>
-              </div>
+      <div class="page-breadcrumb">
+        <div class="row">
+          <div class="col-5 align-self-center">
+            <h4 class="page-title">Trang chủ</h4>
+          </div>
+          <div class="col-7 align-self-center">
+            <div class="d-flex align-items-center justify-content-end">
+              <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                  <li class="breadcrumb-item active" aria-current="page">
+                    Trang chủ
+                  </li>
+                </ol>
+              </nav>
             </div>
-            <div id="table"></div>
           </div>
         </div>
-        <div class="" style="height: 500px"></div>
+      </div>
+      <!-- ============================================================== -->
+      <!-- End Bread crumb and right sidebar toggle -->
+      <!-- ============================================================== -->
+      <!-- ============================================================== -->
+      <!-- Container fluid  -->
+      <!-- ============================================================== -->
+      <div class="container-fluid">
         <!-- ============================================================== -->
-        <!-- End Bread crumb and right sidebar toggle -->
-        <!-- ============================================================== -->
-        <!-- ============================================================== -->
-        <!-- Container fluid  -->
-        <!-- ============================================================== -->
-
-        <!-- ============================================================== -->
-        <!-- End Container fluid  -->
-        <!-- ============================================================== -->
-        <!-- ============================================================== -->
-        <!-- footer -->
+        <!-- Start Page Content -->
         <!-- ============================================================== -->
 
+        <!-- Phần Camera -->
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-body">
+                <h4 class="card-title mb-4">
+                  <i class="mdi mdi-camera"></i> Camera giám sát
+                </h4>
+                <div class="row">
+                  <!-- Camera 1 - Cổng vào -->
+                  <div class="col-md-6">
+                    <div class="camera-container">
+                      <h5 class="text-center mb-3">
+                        <i class="mdi mdi-login text-success"></i> Camera cổng vào
+                      </h5>
+                      <div class="camera-frame">
+                        <img id="camera1" class="camera-video" src="http://127.0.0.1:5000/video" alt="">
+                      </div>
+
+                    </div>
+                  </div>
+
+                  <!-- Camera 2 - Cổng ra -->
+                  <div class="col-md-6">
+                    <div class="camera-container">
+                      <h5 class="text-center mb-3">
+                        <i class="mdi mdi-logout text-danger"></i> Camera cổng ra
+                      </h5>
+                      <div class="camera-frame">
+                        <img id="camera2" class="camera-video" src="http://127.0.0.1:5000/video2" alt="">
+                      </div>       
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Thống kê nhanh -->
+        <div class="row">
+          <div class="col-md-3">
+            <div class="card bg-primary text-white">
+              <div class="card-body">
+                <div class="d-flex align-items-center">
+                  <div class="me-3">
+                    <i class="mdi mdi-car font-30"></i>
+                  </div>
+                  <div>
+                    <h3 class="mb-0" id="totalVehiclesToday">0</h3>
+                    <span>Xe hôm nay</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card bg-success text-white">
+              <div class="card-body">
+                <div class="d-flex align-items-center">
+                  <div class="me-3">
+                    <i class="mdi mdi-login font-30"></i>
+                  </div>
+                  <div>
+                    <h3 class="mb-0" id="totalInToday">0</h3>
+                    <span>Xe vào</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card bg-danger text-white">
+              <div class="card-body">
+                <div class="d-flex align-items-center">
+                  <div class="me-3">
+                    <i class="mdi mdi-logout font-30"></i>
+                  </div>
+                  <div>
+                    <h3 class="mb-0" id="totalOutToday">0</h3>
+                    <span>Xe ra</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card bg-warning text-white">
+              <div class="card-body">
+                <div class="d-flex align-items-center">
+                  <div class="me-3">
+                    <i class="mdi mdi-parking font-30"></i>
+                  </div>
+                  <div>
+                    <h3 class="mb-0" id="totalParking">0</h3>
+                    <span>Đang trong bãi</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bảng danh sách xe gần đây -->
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h4 class="card-title">
+                    <i class="mdi mdi-format-list-bulleted"></i> Danh sách xe gần đây
+                  </h4>
+                  <div>
+                    <button class="btn btn-sm btn-primary" onclick="refreshData()">
+                      <i class="mdi mdi-refresh"></i> Làm mới
+                    </button>
+                    <a href="../thongke/thongke.html" class="btn btn-sm btn-info">
+                      <i class="mdi mdi-chart-line"></i> Xem chi tiết
+                    </a>
+                  </div>
+                </div>
+
+                <div class="table-responsive">
+                  <table class="table table-striped table-hover">
+                    <thead class="thead-dark">
+                      <tr>
+                        <th>STT</th>
+                        <th>Thời gian</th>
+                        <th>Biển số xe</th>
+                        <th>Tên lái xe</th>
+                        <th>Chức vụ</th>
+                        <th>Cấp bậc</th>
+                        <th>Trạng thái</th>
+                        <th>Ghi chú</th>
+                      </tr>
+                    </thead>
+                    <tbody id="recentVehiclesTable">
+                      <!-- Dữ liệu sẽ được load bằng JavaScript -->
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="text-center mt-3">
+                  <p class="text-muted">Hiển thị 10 bản ghi gần nhất</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- ============================================================== -->
-        <!-- End footer -->
+        <!-- End Page Content -->
         <!-- ============================================================== -->
       </div>
       <!-- ============================================================== -->
-      <!-- End Page wrapper  -->
+      <!-- End Container fluid  -->
+      <!-- ============================================================== -->
+      <!-- ============================================================== -->
+      <!-- footer -->
+      <!-- ============================================================== -->
+
+      <!-- ============================================================== -->
+      <!-- End footer -->
       <!-- ============================================================== -->
     </div>
     <!-- ============================================================== -->
-    <!-- End Wrapper -->
+    <!-- End Page wrapper  -->
     <!-- ============================================================== -->
-    <!-- ============================================================== -->
-    <!-- All Jquery -->
-    <!-- ============================================================== -->
-    <script src="../../assets/libs/jquery/dist/jquery.min.js"></script>
-    <!-- Bootstrap tether Core JavaScript -->
-    <script src="../../assets/libs/popper.js/dist/umd/popper.min.js"></script>
-    <script src="../../assets/libs/bootstrap/dist/js/bootstrap.min.js"></script>
-    <!-- slimscrollbar scrollbar JavaScript -->
-    <script src="../../assets/extra-libs/sparkline/sparkline.js"></script>
-    <!--Wave Effects -->
-    <script src="../../dist/js/waves.js"></script>
-    <!--Menu sidebar -->
-    <script src="../../dist/js/sidebarmenu.js"></script>
-    <!--Custom JavaScript -->
-    <script src="../../dist/js/custom.min.js"></script>
-    <!--This page JavaScript -->
-    <!--chartis chart-->
-    <script src="../../assets/libs/chartist/dist/chartist.min.js"></script>
-    <script src="../../assets/libs/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
-    <script src="../../dist/js/pages/dashboards/dashboard1.js"></script>
-    <script src="js/camera.js"></script>
-  </body>
+  </div>
+  <!-- ============================================================== -->
+  <!-- End Wrapper -->
+  <!-- ============================================================== -->
+  <!-- ============================================================== -->
+  <!-- All Jquery -->
+  <!-- ============================================================== -->
+  <script src="../../assets/libs/jquery/dist/jquery.min.js"></script>
+  <!-- Bootstrap tether Core JavaScript -->
+  <script src="../../assets/libs/popper.js/dist/umd/popper.min.js"></script>
+  <script src="../../assets/libs/bootstrap/dist/js/bootstrap.min.js"></script>
+  <!-- slimscrollbar scrollbar JavaScript -->
+  <script src="../../assets/extra-libs/sparkline/sparkline.js"></script>
+  <!--Wave Effects -->
+  <script src="../../dist/js/waves.js"></script>
+  <!--Menu sidebar -->
+  <script src="../../dist/js/sidebarmenu.js"></script>
+  <!--Custom JavaScript -->
+  <script src="../../dist/js/custom.min.js"></script>
+  <!--This page JavaScript -->
+  <!-- Custom JavaScript cho trang chủ -->
+  <script src="js/index.js"></script>
+</body>
+
 </html>

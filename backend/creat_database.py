@@ -35,32 +35,35 @@ plates_enter_samples = [
 
 plates_samples = [
     {
-        "plate": "29A-56789",
-        "owner_name": "Nguyễn Văn An",
-        "phone": "0901234567",
-        "is_vip": True
-    },
-    {
-        "plate": "34B-00001",
-        "owner_name": "Trần Thị Bình",
-        "phone": "0987654321",
-        "is_vip": False
-    }
+  "_id": {
+    "$oid": "68f5fce71cb85ba0b8c1c4a4"
+  },
+  "khu_vuc": "54L7",
+  "bien_so": 9999,
+  "time": {
+    "$date": "2025-10-20T09:08:16.609Z"
+  },
+  "trang_thai": false,
+  "statue": "ra",
+  "infomation": "người lạ",
+  "error": ""
+}
 ]
 
 employees_samples = [
     {
-        "employee_id": "NV001",
-        "name": "Lê Văn Cường",
-        "chuc_vu": "Bảo vệ",
-        "active": True
-    },
-    {
-        "employee_id": "NV002",
-        "name": "Phạm Thị Dung",
-        "chuc_vu": "Quản lý",
-        "active": True
-    }
+  "_id": {
+    "$oid": "68f5c5f81cb85ba0b8c1c492"
+  },
+  "employee": "nguyen van c",
+  "khu_vuc": "45A2",
+  "bien_so": 99999,
+  "chuc_vu": "đại tá",
+  "trang_thai": false,
+  "time_cap_nhat": {
+    "$date": "2025-10-20T07:52:34.303Z"
+  }
+}
 ]
 
 # --- KẾT NỐI VÀ CHÈN DỮ LIỆU ---

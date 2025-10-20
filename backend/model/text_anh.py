@@ -1,3 +1,4 @@
+from ctypes.util import test
 import cv2
 import numpy as np
 from ultralytics import YOLO
@@ -8,6 +9,7 @@ import imutils
 import time
 import sys
 import os
+from newSql import save_plate,example_plate,example_status
 
 # ================== Model và OCR ==================
 model = YOLO("best.pt")  # đường dẫn đến model của bạn
@@ -16,14 +18,22 @@ reader = easyocr.Reader(['en'], gpu=True)
 # ================== Regex để chuẩn hoá biển số ==================
 regex_line1 = re.compile(r'^[0-9]{2}[A-Z]{1}[0-9]{1}$')
 regex_line2 = re.compile(r'^[0-9]{4,5}$')
+number_out = None
 
-def correct_plate_format(line1: str, line2: str) -> str:
+
+def correct_plate_format(line1: str, line2: str, trang_thai: bool) -> str:
     """Chuẩn hoá định dạng biển số"""
+    global number_out, number_enter
     line1 = line1.strip().upper().replace(" ", "")
     line2 = line2.strip().upper().replace(" ", "")
     if regex_line1.match(line1) and regex_line2.match(line2):
+        if number_out == line2:
+            number_out = line2
+            example_status(line1,line2, trang_thai)
+        else:
+            number_out = line2
+            example_plate(line1,line2, trang_thai)
         return line1, line2
-
     mapping_number_to_alpha = {"0": "D", "1": "I", "2": "S", "3": "E",
                                "4": "A", "5": "S", "6": "G", "7": "T",
                                "8": "B", "9": "P"}
@@ -38,21 +48,28 @@ def correct_plate_format(line1: str, line2: str) -> str:
     for i, ch in enumerate(line1):
         if i < 2:
             corrected.append(mapping_alpha_to_number.get(ch, ch))
-        elif i == 2:
+        elif i == 2 or i == 3:
             corrected.append(mapping_number_to_alpha.get(ch, ch))
         else:
             corrected.append(ch)
 
     corrected2 = [mapping_alpha_to_number.get(ch, ch) for ch in line2]
-
-    if not (regex_line1.match("".join(corrected)) and regex_line2.match("".join(corrected2))):
-        return ""
+    plates = "".join(corrected2)
+    print("corrected2:", plates)
+    if number_out == plates:
+        number_out = plates
+        example_status(line1,plates, trang_thai)
+    else:
+        print("Biển số hợp lệ:", plates)
+        number_out = plates
+        example_plate(line1,number_out, trang_thai)
 
     return "".join(corrected), "".join(corrected2)
 
 
 def preprocess_plate(plate_crop):
     """Tiền xử lý ảnh biển số"""
+    
     gray = cv2.cvtColor(plate_crop, cv2.COLOR_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (5, 5), 0)
     _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
@@ -84,7 +101,7 @@ def recognize_plate(plate_crop):
         print("OCR raw:", ocr_result)
         if len(ocr_result) >= 2:
             l1, l2 = ocr_result[0], ocr_result[1]
-            plate_text = correct_plate_format(l1, l2)
+            plate_text = correct_plate_format(l1, l2, False)
             if plate_text:
                 print("✅ Biển số hợp lệ:", plate_text)
                 return plate_text

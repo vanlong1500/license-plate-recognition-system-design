@@ -14,14 +14,7 @@
       sizes="16x16"
       href="../../assets/images/favicon.png"
     />
-    <title>
-      Nice admin Template - The Ultimate Multipurpose admin template
-    </title>
-    <!-- Custom CSS -->
-    <link
-      href="../../assets/libs/chartist/dist/chartist.min.css"
-      rel="stylesheet"
-    />
+    <title>Thống kê xe ra vào - Hệ thống quản lý bãi xe</title>
     <!-- Custom CSS -->
     <link href="../../dist/css/style.min.css" rel="stylesheet" />
   </head>
@@ -66,7 +59,7 @@
               <li class="sidebar-item">
                 <a
                   class="sidebar-link waves-effect waves-dark sidebar-link"
-                  href="index.html"
+                  href="../home/index.html"
                   aria-expanded="false"
                 >
                   <i class="mdi mdi-av-timer"></i>
@@ -86,7 +79,7 @@
               <li class="sidebar-item">
                 <a
                   class="sidebar-link waves-effect waves-dark sidebar-link"
-                  href="table.html"
+                  href="thongke.html"
                   aria-expanded="false"
                 >
                   <i class="mdi mdi-arrange-bring-forward"></i>
@@ -112,17 +105,17 @@
         <div class="page-breadcrumb">
           <div class="row">
             <div class="col-5 align-self-center">
-              <h4 class="page-title">Dashboard</h4>
+              <h4 class="page-title">Thống kê xe ra vào</h4>
             </div>
             <div class="col-7 align-self-center">
               <div class="d-flex align-items-center justify-content-end">
                 <nav aria-label="breadcrumb">
                   <ol class="breadcrumb">
                     <li class="breadcrumb-item">
-                      <a href="#">Home</a>
+                      <a href="../index.html">Trang chủ</a>
                     </li>
                     <li class="breadcrumb-item active" aria-current="page">
-                      Dashboard
+                      Thống kê
                     </li>
                   </ol>
                 </nav>
@@ -136,7 +129,225 @@
         <!-- ============================================================== -->
         <!-- Container fluid  -->
         <!-- ============================================================== -->
+        <div class="container-fluid">
+          <!-- ============================================================== -->
+          <!-- Start Page Content -->
+          <!-- ============================================================== -->
 
+          <!-- Bộ lọc và tìm kiếm -->
+          <div class="row">
+            <div class="col-12">
+              <div class="card">
+                <div class="card-body">
+                  <h4 class="card-title">Bộ lọc thống kê</h4>
+                  <div class="row">
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <label>Từ ngày:</label>
+                        <input type="date" class="form-control" id="fromDate" />
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <label>Đến ngày:</label>
+                        <input type="date" class="form-control" id="toDate" />
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <label>Trạng thái:</label>
+                        <select class="form-control" id="statusFilter">
+                          <option value="">Tất cả</option>
+                          <option value="vao">Vào</option>
+                          <option value="ra">Ra</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <label>&nbsp;</label>
+                        <div>
+                          <button
+                            type="button"
+                            class="btn btn-primary"
+                            onclick="filterData()"
+                          >
+                            <i class="mdi mdi-filter"></i> Lọc
+                          </button>
+                          <button
+                            type="button"
+                            class="btn btn-success"
+                            onclick="exportData()"
+                          >
+                            <i class="mdi mdi-download"></i> Xuất Excel
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Thống kê tổng quan -->
+          <div class="row">
+            <div class="col-md-3">
+              <div class="card">
+                <div class="card-body">
+                  <div class="d-flex no-block">
+                    <div class="me-3 align-self-center">
+                      <span class="lstick d-inline-block align-middle"></span>
+                      <img
+                        src="../../assets/images/icon/car-in.png"
+                        alt="user"
+                        class="img-fluid"
+                        width="40"
+                      />
+                    </div>
+                    <div class="align-self-center">
+                      <h6 class="text-muted mt-2 mb-0">Xe vào hôm nay</h6>
+                      <h2 class="text-primary" id="totalIn">0</h2>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card">
+                <div class="card-body">
+                  <div class="d-flex no-block">
+                    <div class="me-3 align-self-center">
+                      <span class="lstick d-inline-block align-middle"></span>
+                      <img
+                        src="../../assets/images/icon/car-out.png"
+                        alt="user"
+                        class="img-fluid"
+                        width="40"
+                      />
+                    </div>
+                    <div class="align-self-center">
+                      <h6 class="text-muted mt-2 mb-0">Xe ra hôm nay</h6>
+                      <h2 class="text-danger" id="totalOut">0</h2>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card">
+                <div class="card-body">
+                  <div class="d-flex no-block">
+                    <div class="me-3 align-self-center">
+                      <span class="lstick d-inline-block align-middle"></span>
+                      <img
+                        src="../../assets/images/icon/car-total.png"
+                        alt="user"
+                        class="img-fluid"
+                        width="40"
+                      />
+                    </div>
+                    <div class="align-self-center">
+                      <h6 class="text-muted mt-2 mb-0">Tổng lượt</h6>
+                      <h2 class="text-info" id="totalAll">0</h2>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card">
+                <div class="card-body">
+                  <div class="d-flex no-block">
+                    <div class="me-3 align-self-center">
+                      <span class="lstick d-inline-block align-middle"></span>
+                      <img
+                        src="../../assets/images/icon/car-parking.png"
+                        alt="user"
+                        class="img-fluid"
+                        width="40"
+                      />
+                    </div>
+                    <div class="align-self-center">
+                      <h6 class="text-muted mt-2 mb-0">Xe đang trong bãi</h6>
+                      <h2 class="text-warning" id="totalParking">0</h2>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bảng danh sách xe -->
+          <div class="row">
+            <div class="col-12">
+              <div class="card">
+                <div class="card-body">
+                  <div
+                    class="d-flex justify-content-between align-items-center mb-3"
+                  >
+                    <h4 class="card-title">Danh sách xe ra vào</h4>
+                    <div>
+                      <input
+                        type="text"
+                        class="form-control d-inline-block"
+                        style="width: 200px"
+                        placeholder="Tìm kiếm biển số..."
+                        id="searchInput"
+                        onkeyup="searchTable()"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="table-responsive">
+                    <table
+                      class="table table-striped table-bordered"
+                      id="vehicleTable"
+                    >
+                      <thead class="thead-dark">
+                        <tr>
+                          <th>STT</th>
+                          <th>Biển số xe</th>
+                          <th>Tên lái xe</th>
+                          <th>Cấp bậc</th>
+                          <th>Chức vụ</th>
+                          <th>Thời gian</th>
+                          <th>Trạng thái</th>
+                          <th>Ghi chú</th>
+                        </tr>
+                      </thead>
+                      <tbody id="vehicleTableBody">
+                        <!-- Dữ liệu sẽ được load bằng JavaScript -->
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <!-- Phân trang -->
+                  <div
+                    class="d-flex justify-content-between align-items-center mt-3"
+                  >
+                    <div>
+                      <span
+                        >Hiển thị <span id="showingFrom">1</span> đến
+                        <span id="showingTo">10</span> trong tổng số
+                        <span id="totalRecords">0</span> bản ghi</span
+                      >
+                    </div>
+                    <nav>
+                      <ul class="pagination" id="pagination">
+                        <!-- Phân trang sẽ được tạo bằng JavaScript -->
+                      </ul>
+                    </nav>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ============================================================== -->
+          <!-- End Page Content -->
+          <!-- ============================================================== -->
+        </div>
         <!-- ============================================================== -->
         <!-- End Container fluid  -->
         <!-- ============================================================== -->
@@ -171,9 +382,7 @@
     <!--Custom JavaScript -->
     <script src="../../dist/js/custom.min.js"></script>
     <!--This page JavaScript -->
-    <!--chartis chart-->
-    <script src="../../assets/libs/chartist/dist/chartist.min.js"></script>
-    <script src="../../assets/libs/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
-    <script src="../../dist/js/pages/dashboards/dashboard1.js"></script>
+    <!-- Custom JavaScript cho trang thống kê -->
+    <script src="thongke.js"></script>
   </body>
 </html>

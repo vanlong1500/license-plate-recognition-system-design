@@ -6,7 +6,7 @@ import re
 from collections import defaultdict, deque
 import threading
 import time
-from newSql import save_plate
+from newSql import save_plate,example_plate,example_status
 from imutils.perspective import four_point_transform
 import imutils
 import requests
@@ -44,46 +44,61 @@ reader = easyocr.Reader(['en'], gpu=True)  # EasyOCR
 # Regex
 regex_line1 = re.compile(r'^[0-9]{2}[A-Z]{1}[0-9]{1}$')
 regex_line2 = re.compile(r'^[0-9]{4,5}$')
+number_out = None
 
-# Stabilization
-plate_history = defaultdict(lambda: deque(maxlen=10))
-plate_final = {}
-
-
-# ================== Functions ==================
-def correct_plate_format(line1: str, line2: str) -> str:
+def correct_plate_format(line1: str, line2: str, trang_thai: bool) -> str:
+    """Chuẩn hoá định dạng biển số"""
+    global number_out
     line1 = line1.strip().upper().replace(" ", "")
     line2 = line2.strip().upper().replace(" ", "")
+    close = False
     if regex_line1.match(line1) and regex_line2.match(line2):
-        return f"{line1} {line2}"
-    """Chuẩn hóa định dạng biển số"""
+        if number_out == line2:
+            close = example_status(line1,line2, trang_thai)
+        else:
+            number_out = line2
+            close = example_plate(line1,line2, trang_thai)
+            
+        if close == True:
+            return ""
+        else:
+            return line1, line2
     mapping_number_to_alpha = {"0": "D", "1": "I", "2": "S", "3": "E",
                                "4": "A", "5": "S", "6": "G", "7": "T",
                                "8": "B", "9": "P"}
-    mapping_alpha_to_number = { "I": "1", "K": "2", "E": "3",
-                               "A": "4", "S": "5", "G": "6", "T": "7",
-                               "B": "8", "P": "9", "L": "4","D": "0","C":"0","F":"5",}
+    mapping_alpha_to_number = {"I": "1", "K": "2", "E": "3", "A": "4",
+                               "S": "5", "G": "6", "T": "7", "B": "8",
+                               "P": "9", "L": "4", "D": "0", "C": "0", "F": "5"}
 
     if len(line1) != 4 or len(line2) not in [4, 5]:
         return ""
 
     corrected = []
     for i, ch in enumerate(line1):
-        if i < 2:  # số
+        if i < 2:
             corrected.append(mapping_alpha_to_number.get(ch, ch))
-        elif i == 2:  # chữ
+        elif i == 2 or i == 3:
             corrected.append(mapping_number_to_alpha.get(ch, ch))
         else:
             corrected.append(ch)
 
     corrected2 = [mapping_alpha_to_number.get(ch, ch) for ch in line2]
-
-    if not (regex_line1.match("".join(corrected)) and regex_line2.match("".join(corrected2))):
+    plates = "".join(corrected2)
+    print("corrected2:", plates)
+    if number_out == plates:
+        number_out = plates
+        close = example_status(line1,plates, trang_thai)
+    else:
+        print("Biển số hợp lệ:", plates)
+        number_out = plates
+        close = example_plate(line1,number_out, trang_thai)
+    if close == True:
         return ""
+    else:
+        return "".join(corrected), "".join(corrected2)
 
-    return f"{''.join(corrected)} {''.join(corrected2)}"
 
-
+#
 def preprocess_plate(plate_crop):
     gray = cv2.cvtColor(plate_crop, cv2.COLOR_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (5, 5), 0)
@@ -103,7 +118,7 @@ def preprocess_plate(plate_crop):
         _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
     return cv2.resize(thresh, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
-
+#
 def recognize_plate(plate_crop):
     """OCR và trả về biển số hợp lệ"""
     if plate_crop.size == 0:
@@ -155,7 +170,7 @@ def draw_plate(frame, x1, y1, x2, y2, stable_text):
                     cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 0), 6)  # outline đen
         cv2.putText(frame, stable_text, (text_x, text_y),
                     cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 3)  # chữ trắng
-
+# 
 def process_frame(frame, conf_thresh=0.3):
     """Xử lý 1 frame, trả về frame vẽ + danh sách biển số"""
     results = model(frame, verbose=False)
@@ -181,10 +196,8 @@ def process_frame(frame, conf_thresh=0.3):
 
             if text:
                 detected_plates.append(text)
-                save_plate(text)
-                
                 try:
-                    res = requests.post("http://localhost:5000/update_plate", json={"plate": text})
+                    res = requests.post("http://localhost:5000/update_plate", json={"bien_so": detected_plates, })
                     if res.ok:
                         print("Phản hồi từ server:", res.json())
                     else:
@@ -194,81 +207,5 @@ def process_frame(frame, conf_thresh=0.3):
             # Vẽ bounding box + overlay
             draw_plate(frame, x1, y1, x2, y2, stable_text)
 
-
     return frame, detected_plates, has_plate
 
-
-# ================== Main ==================
-# def main():
-#     stream = CameraStream("http://192.168.10.106:8080/video")
-#     CONF_THRESH = 0.3
-
-#     while True:
-#         start_time = time.time()
-#         ret, frame = stream.read()
-#         if not ret:
-#             print("Không đọc được frame từ camera")
-#             break
-
-#         frame, detected_plates, has_plate = process_frame(frame, CONF_THRESH)
-
-#         if has_plate:
-#             if detected_plates:
-#                 print("Biển số nhận dạng được:", detected_plates)
-#             cv2.imshow('IP Camera - License Plate Detection', frame)
-
-#         print(f"Thời gian xử lý frame: {time.time() - start_time:.3f} giây")
-
-#         if cv2.waitKey(1) & 0xFF == ord('q'):
-#             break
-
-#     stream.release()
-#     cv2.destroyAllWindows()
-
-
-# if __name__ == "__main__":
-#     main()
-# ================== Video Frame Generator ==================
-def generate_frames():
-    """
-    Tạo ra một luồng video từ camera IP, xử lý từng frame để nhận dạng biển số,
-    và trả về các frame đã được mã hóa JPEG.
-    """
-    # rtsp_url = "rtsp://admin:camera2025@192.168.1.10:554/Streaming/Channels/101"
-
-    stream = CameraStream("http://192.168.1.27:8080/video")
-    CONF_THRESH = 0.3
-
-    try:
-        while True:
-            # Đọc frame từ CameraStream
-            ret, frame = stream.read()
-            if not ret or frame is None:
-                # Nếu không đọc được frame, chờ một lát rồi thử lại
-                time.sleep(0.1)
-                continue
-            
-            start_time = time.time()
-            # Xử lý frame
-            frame, detected_plates, has_plate = process_frame(frame, CONF_THRESH)
-
-            elapsed = time.time() - start_time
-            print(f"Thời gian xử lý frame: {elapsed:.3f} giây")
-            # In biển số ra console để kiểm tra
-            if detected_plates:
-                print("Biển số nhận dạng được:", detected_plates)
-
-            # Mã hóa frame đã xử lý thành định dạng JPEG
-            ret, buffer = cv2.imencode('.jpg', frame)
-            if not ret:
-                continue
-                
-            frame_bytes = buffer.tobytes()
-
-            # Trả về frame dưới dạng byte stream
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
-    finally:
-        # Khối code này sẽ luôn được chạy khi hàm kết thúc
-        # dù là do lỗi hay do bạn tắt server
-        stream.release()
