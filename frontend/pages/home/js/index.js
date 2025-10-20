@@ -8,7 +8,7 @@ let vehicleData = [
     position: "Trưởng phòng",
     time: "2024-10-20 08:30:00",
     status: "vao",
-    note: "Công tác"
+    note: "Công tác",
   },
   {
     id: 2,
@@ -18,7 +18,7 @@ let vehicleData = [
     position: "Phó phòng",
     time: "2024-10-20 09:15:00",
     status: "vao",
-    note: "Họp"
+    note: "Họp",
   },
   {
     id: 3,
@@ -28,7 +28,7 @@ let vehicleData = [
     position: "Nhân viên",
     time: "2024-10-20 10:00:00",
     status: "vao",
-    note: "Làm việc"
+    note: "Làm việc",
   },
   {
     id: 4,
@@ -38,7 +38,7 @@ let vehicleData = [
     position: "Trưởng phòng",
     time: "2024-10-20 17:30:00",
     status: "ra",
-    note: "Về nhà"
+    note: "Về nhà",
   },
   {
     id: 5,
@@ -48,8 +48,8 @@ let vehicleData = [
     position: "Phó phòng",
     time: "2024-10-20 18:00:00",
     status: "ra",
-    note: "Kết thúc công việc"
-  }
+    note: "Kết thúc công việc",
+  },
 ];
 
 // Biến lưu trữ camera streams
@@ -57,7 +57,7 @@ let camera1Stream = null;
 let camera2Stream = null;
 
 // Khởi tạo trang
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener("DOMContentLoaded", function () {
   initializeCameras();
   loadRecentVehicles();
   updateStatistics();
@@ -69,143 +69,12 @@ document.addEventListener('DOMContentLoaded', function () {
   }, 30000);
 });
 
-// Khởi tạo camera
-async function initializeCameras() {
-  try {
-    // Khởi tạo camera 1
-    await startCamera(1);
-
-    // Khởi tạo camera 2 (có thể sử dụng camera khác hoặc giả lập)
-    await startCamera(2);
-
-  } catch (error) {
-    console.error('Lỗi khởi tạo camera:', error);
-    showCameraError();
-  }
-}
-
-// Bắt đầu camera
-async function startCamera(cameraId) {
-  try {
-    const constraints = {
-      video: {
-        width: { ideal: 640 },
-        height: { ideal: 480 },
-        facingMode: 'environment' // Sử dụng camera sau nếu có
-      },
-      audio: false
-    };
-
-    const stream = await navigator.mediaDevices.getUserMedia(constraints);
-    const videoElement = document.getElementById(`camera${cameraId}`);
-
-    if (videoElement) {
-      videoElement.srcObject = stream;
-
-      // Lưu stream để có thể dừng sau này
-      if (cameraId === 1) {
-        camera1Stream = stream;
-      } else {
-        camera2Stream = stream;
-      }
-
-      // Cập nhật trạng thái camera
-      updateCameraStatus(cameraId, 'online');
-    }
-
-  } catch (error) {
-    console.error(`Lỗi khởi tạo camera ${cameraId}:`, error);
-    updateCameraStatus(cameraId, 'offline');
-
-    // Hiển thị hình ảnh demo thay thế
-    showDemoImage(cameraId);
-  }
-}
-
-// Cập nhật trạng thái camera
-function updateCameraStatus(cameraId, status) {
-  const statusElement = document.querySelector(`#camera${cameraId}`).parentElement.querySelector('.camera-status');
-
-  if (statusElement) {
-    statusElement.className = `camera-status ${status}`;
-    statusElement.innerHTML = status === 'online'
-      ? '<i class="mdi mdi-circle"></i> Đang hoạt động'
-      : '<i class="mdi mdi-circle"></i> Không kết nối';
-  }
-}
-
-// Hiển thị hình ảnh demo khi không có camera
-function showDemoImage(cameraId) {
-  const videoElement = document.getElementById(`camera${cameraId}`);
-  const container = videoElement.parentElement;
-
-  // Tạo div thay thế với hình ảnh demo
-  const demoDiv = document.createElement('div');
-  demoDiv.className = 'camera-video d-flex align-items-center justify-content-center';
-  demoDiv.style.background = 'linear-gradient(45deg, #333, #555)';
-  demoDiv.style.color = 'white';
-  demoDiv.innerHTML = `
-    <div class="text-center">
-      <i class="mdi mdi-camera-off" style="font-size: 48px; opacity: 0.5;"></i>
-      <p class="mt-2 mb-0">Camera ${cameraId === 1 ? 'cổng vào' : 'cổng ra'}</p>
-      <small>Không có thiết bị</small>
-    </div>
-  `;
-
-  // Thay thế video element
-  container.replaceChild(demoDiv, videoElement);
-}
-
-// Bật/tắt camera
-function toggleCamera(cameraId) {
-  const videoElement = document.getElementById(`camera${cameraId}`);
-
-  if (videoElement && videoElement.srcObject) {
-    const stream = videoElement.srcObject;
-    const tracks = stream.getVideoTracks();
-
-    tracks.forEach(track => {
-      track.enabled = !track.enabled;
-    });
-
-    // Cập nhật trạng thái
-    updateCameraStatus(cameraId, tracks[0].enabled ? 'online' : 'offline');
-  }
-}
-
-// Chụp ảnh từ camera
-function captureImage(cameraId) {
-  const videoElement = document.getElementById(`camera${cameraId}`);
-
-  if (videoElement && videoElement.srcObject) {
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-
-    canvas.width = videoElement.videoWidth;
-    canvas.height = videoElement.videoHeight;
-
-    context.drawImage(videoElement, 0, 0);
-
-    // Chuyển đổi thành blob và tải xuống
-    canvas.toBlob(blob => {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `camera_${cameraId}_${new Date().toISOString().replace(/[:.]/g, '-')}.jpg`;
-      a.click();
-      URL.revokeObjectURL(url);
-    }, 'image/jpeg', 0.9);
-
-    // Hiển thị thông báo
-    showNotification(`Đã chụp ảnh từ camera ${cameraId}`, 'success');
-  } else {
-    showNotification('Camera không hoạt động', 'error');
-  }
-}
+// ======================== CAMERA FLASK STREAM ========================
+// ======================== FLASK CAMERA STREAM ========================
 
 // Load danh sách xe gần đây
 function loadRecentVehicles() {
-  const tbody = document.getElementById('recentVehiclesTable');
+  const tbody = document.getElementById("recentVehiclesTable");
 
   if (!tbody) return;
 
@@ -214,13 +83,14 @@ function loadRecentVehicles() {
     .sort((a, b) => new Date(b.time) - new Date(a.time))
     .slice(0, 10);
 
-  tbody.innerHTML = '';
+  tbody.innerHTML = "";
 
   recentData.forEach((item, index) => {
-    const row = document.createElement('tr');
-    const statusBadge = item.status === 'vao'
-      ? '<span class="badge badge-success"><i class="mdi mdi-login"></i> Vào</span>'
-      : '<span class="badge badge-danger"><i class="mdi mdi-logout"></i> Ra</span>';
+    const row = document.createElement("tr");
+    const statusBadge =
+      item.status === "vao"
+        ? '<span class="badge badge-success"><i class="mdi mdi-login"></i> Vào</span>'
+        : '<span class="badge badge-danger"><i class="mdi mdi-logout"></i> Ra</span>';
 
     row.innerHTML = `
       <td>${index + 1}</td>
@@ -239,30 +109,33 @@ function loadRecentVehicles() {
 
 // Cập nhật thống kê
 function updateStatistics() {
-  const today = new Date().toISOString().split('T')[0];
-  const todayData = vehicleData.filter(item => item.time.startsWith(today));
+  const today = new Date().toISOString().split("T")[0];
+  const todayData = vehicleData.filter((item) => item.time.startsWith(today));
 
-  const totalInToday = todayData.filter(item => item.status === 'vao').length;
-  const totalOutToday = todayData.filter(item => item.status === 'ra').length;
+  const totalInToday = todayData.filter((item) => item.status === "vao").length;
+  const totalOutToday = todayData.filter((item) => item.status === "ra").length;
   const totalVehiclesToday = todayData.length;
 
   // Tính xe đang trong bãi
-  const uniquePlates = [...new Set(vehicleData.map(item => item.plateNumber))];
+  const uniquePlates = [
+    ...new Set(vehicleData.map((item) => item.plateNumber)),
+  ];
   let totalParking = 0;
 
-  uniquePlates.forEach(plate => {
-    const plateRecords = vehicleData.filter(item => item.plateNumber === plate)
+  uniquePlates.forEach((plate) => {
+    const plateRecords = vehicleData
+      .filter((item) => item.plateNumber === plate)
       .sort((a, b) => new Date(b.time) - new Date(a.time));
-    if (plateRecords.length > 0 && plateRecords[0].status === 'vao') {
+    if (plateRecords.length > 0 && plateRecords[0].status === "vao") {
       totalParking++;
     }
   });
 
   // Cập nhật UI
-  updateCounter('totalVehiclesToday', totalVehiclesToday);
-  updateCounter('totalInToday', totalInToday);
-  updateCounter('totalOutToday', totalOutToday);
-  updateCounter('totalParking', totalParking);
+  updateCounter("totalVehiclesToday", totalVehiclesToday);
+  updateCounter("totalInToday", totalInToday);
+  updateCounter("totalOutToday", totalOutToday);
+  updateCounter("totalParking", totalParking);
 }
 
 // Cập nhật số đếm với hiệu ứng
@@ -288,7 +161,7 @@ function updateCounter(elementId, newValue) {
 
 // Làm mới dữ liệu
 function refreshData() {
-  showNotification('Đang làm mới dữ liệu...', 'info');
+  showNotification("Đang làm mới dữ liệu...", "info");
 
   // Giả lập việc tải dữ liệu mới
   setTimeout(() => {
@@ -299,9 +172,9 @@ function refreshData() {
       driverName: "Người dùng mới",
       rank: "Trung úy",
       position: "Nhân viên",
-      time: new Date().toISOString().replace('T', ' ').substring(0, 19),
-      status: Math.random() > 0.5 ? 'vao' : 'ra',
-      note: "Tự động cập nhật"
+      time: new Date().toISOString().replace("T", " ").substring(0, 19),
+      status: Math.random() > 0.5 ? "vao" : "ra",
+      note: "Tự động cập nhật",
     };
 
     vehicleData.unshift(newRecord);
@@ -313,20 +186,22 @@ function refreshData() {
 
     loadRecentVehicles();
     updateStatistics();
-    showNotification('Dữ liệu đã được cập nhật', 'success');
+    showNotification("Dữ liệu đã được cập nhật", "success");
   }, 1000);
 }
 
 // Hiển thị thông báo
-function showNotification(message, type = 'info') {
+function showNotification(message, type = "info") {
   // Tạo element thông báo
-  const notification = document.createElement('div');
-  notification.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show`;
-  notification.style.position = 'fixed';
-  notification.style.top = '20px';
-  notification.style.right = '20px';
-  notification.style.zIndex = '9999';
-  notification.style.minWidth = '300px';
+  const notification = document.createElement("div");
+  notification.className = `alert alert-${
+    type === "error" ? "danger" : type
+  } alert-dismissible fade show`;
+  notification.style.position = "fixed";
+  notification.style.top = "20px";
+  notification.style.right = "20px";
+  notification.style.zIndex = "9999";
+  notification.style.minWidth = "300px";
 
   notification.innerHTML = `
     ${message}
@@ -348,26 +223,26 @@ function showNotification(message, type = 'info') {
 // Format datetime
 function formatDateTime(dateTimeString) {
   const date = new Date(dateTimeString);
-  return date.toLocaleString('vi-VN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
+  return date.toLocaleString("vi-VN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }
 
 // Xử lý lỗi camera
 function showCameraError() {
-  console.log('Không thể truy cập camera. Sử dụng chế độ demo.');
+  console.log("Không thể truy cập camera. Sử dụng chế độ demo.");
 }
 
 // Cleanup khi trang được đóng
-window.addEventListener('beforeunload', function () {
+window.addEventListener("beforeunload", function () {
   if (camera1Stream) {
-    camera1Stream.getTracks().forEach(track => track.stop());
+    camera1Stream.getTracks().forEach((track) => track.stop());
   }
   if (camera2Stream) {
-    camera2Stream.getTracks().forEach(track => track.stop());
+    camera2Stream.getTracks().forEach((track) => track.stop());
   }
 });
