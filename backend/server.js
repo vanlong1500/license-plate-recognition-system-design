@@ -23,9 +23,9 @@ let staffCollection;
 async function connectDB() {
   try {
     await client.connect();
-    const db = client.db("employees"); // 🔥 database
-    staffCollection = db.collection("staff"); // 🔥 collection
-    console.log("✅ Connected to MongoDB (employees.staff)");
+    const db = client.db("plates"); // 🔥 database
+    staffCollection = db.collection("employees"); // 🔥 collection
+    console.log("✅ Connected to MongoDB (plates.employees)");
   } catch (err) {
     console.error("❌ Database connection error:", err);
   }
@@ -87,57 +87,33 @@ app.get("/quanly/delete/:id", async (req, res) => {
   try {
     const result = await staffCollection.deleteOne({ _id: new ObjectId(id) });
     if (result.deletedCount === 1) {
-      // res.send(
-      //   `<script>alert('Xóa nhân viên thành công'); window.location.href='/quanly';</script>`
-      // );
       res.json({ success: true, message: "Xóa nhân viên thành công" });
     } else {
-      // res.send(
-      //   `<script>alert('Không tìm thấy nhân viên'); window.location.href='/quanly';</script>`
-      // );
       res.json({ success: false, message: "Không tìm thấy nhân viên" });
     }
   } catch (err) {
     console.error(err);
-    // res.send(
-    //   `<script>alert('Lỗi server'); window.location.href='/quanly';</script>`
-    // );
+
     res.status(500).json({ success: false, message: "Lỗi server" });
   }
 });
-// EDIT NHÂN VIÊN (PUT)
-// app.put("/quanly/edit/:id", async (req, res) => {
-//   const { id } = req.params;
-//   const updateData = req.body; // { name, rank, position, licensePlate }
-
-//   try {
-//     const result = await staffCollection.updateOne(
-//       { _id: new ObjectId(id) },
-//       { $set: updateData }
-//     );
-
-//     if (result.modifiedCount === 1) {
-//       res.json({ success: true, message: "Cập nhật thành công" });
-//     } else {
-//       res.json({
-//         success: false,
-//         message: "Không tìm thấy nhân viên hoặc không thay đổi gì",
-//       });
-//     }
-//   } catch (err) {
-//     console.error(err);
-//     res
-//       .status(500)
-//       .json({ success: false, message: "Lỗi server khi cập nhật" });
-//   }
-// });
+// ------------------------------------------------------------
 // EDIT NHÂN VIÊN (PUT)
 app.put("/quanly/edit/:id", upload.single("avatar"), async (req, res) => {
   const { id } = req.params;
 
   try {
-    const { name, rank, position, licensePlate } = req.body;
-    const updateData = { name, rank, position, licensePlate };
+    const { name, rank, position, plateArea, plateNum, status, error } =
+      req.body;
+    const updateData = {
+      name,
+      rank,
+      position,
+      plateArea,
+      plateNum,
+      status,
+      error: error === "true" || false,
+    };
 
     // Nếu có file mới thì cập nhật đường dẫn avatar
     if (req.file) {
@@ -149,19 +125,10 @@ app.put("/quanly/edit/:id", upload.single("avatar"), async (req, res) => {
       { $set: updateData }
     );
 
-    if (result.modifiedCount === 1) {
-      res.json({
-        success: true,
-        message: "Cập nhật thành công",
-        avatar: updateData.avatar, // trả về nếu cần update preview front-end
-      });
-    }
-    // else {
-    //   // res.json({
-    //   //   success: false,
-    //   //   // message: "Không tìm thấy nhân viên hoặc không thay đổi gì",
-    //   // });
-    // }
+    res.json({
+      success: result.modifiedCount === 1,
+      message: "Cập nhật thành công",
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({
@@ -175,7 +142,8 @@ app.put("/quanly/edit/:id", upload.single("avatar"), async (req, res) => {
 // Thêm nhân viên (upload ảnh + insert vào MongoDB)
 app.post("/quanly/add", upload.single("avatar"), async (req, res) => {
   try {
-    const { name, rank, position, licensePlate } = req.body;
+    const { name, rank, position, plateArea, plateNum, status, error } =
+      req.body;
     let avatarPath = "";
 
     if (req.file) {
@@ -186,20 +154,33 @@ app.post("/quanly/add", upload.single("avatar"), async (req, res) => {
       avatarPath = "/assets/images/default-avatar.png"; // hoặc để rỗng
     }
 
+    // const newStaff = {
+    //   name: name || "",
+    //   rank: rank || "",
+    //   position: position || "",
+    //   Plate: {
+    //     area,
+    //     number,
+    //   },
+    //   avatar: avatarPath,
+    //   createdAt: new Date(),
+    // };
     const newStaff = {
       name: name || "",
       rank: rank || "",
       position: position || "",
-      licensePlate: licensePlate || "",
+      plateArea: plateArea || "",
+      plateNum: plateNum || "",
+      status: status || "Out", // mặc định Enter nếu không có
+      error: error === "true" || false, // parse từ string nếu từ form gửi
       avatar: avatarPath,
       createdAt: new Date(),
     };
 
     const result = await staffCollection.insertOne(newStaff);
     // gán _id về staff để trả về
-    newStaff._id = result.insertedId.toString
-      ? result.insertedId.toString()
-      : result.insertedId;
+
+    newStaff._id = result.insertedId;
 
     res.json({ success: true, staff: newStaff });
   } catch (err) {

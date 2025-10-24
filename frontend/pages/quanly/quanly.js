@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         (s, i) => `
       <tr data-id="${s._id}">
         <td>${i + 1}</td>
-        <td>${s.name}</td>
+        <td data-original="${s.name}">${s.name}</td>
         <td class="avatar-cell">
           <div class="avatar-wrapper" style="position: relative; display: inline-block;">
             <img src="${
@@ -30,9 +30,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             </div>
           </div>
         </td>
-        <td>${s.rank}</td>
-        <td>${s.position}</td>
-        <td>${s.licensePlate}</td>
+        <td data-original="${s.rank}">${s.rank}</td>
+        <td data-original="${s.position}">${s.position}</td>
+        <td data-original="${s.plateArea || ""}">${s.plateArea || ""}</td>
+        <td data-original="${s.plateNum || ""}">${s.plateNum || ""}</td>
+        <td data-original="${s.status || "None"}">${s.status || "None"}</td>
         <td>
           <a href="#" class="edit-btn">Edit</a>
           <a href="#" class="delete-btn" data-id="${s._id}">Delete</a>
@@ -79,27 +81,37 @@ document.addEventListener("DOMContentLoaded", async () => {
           name: 1,
           rank: 3,
           position: 4,
-          licensePlate: 5,
+          plateArea: 5,
+          plateNum: 6,
+          status: 7, // nếu muốn cho edit luôn trạng thái
         };
         if (!isEditing) {
-          // Bật chế độ edit
+          // / chuyển sang chế độ edit
           Object.entries(editColumns).forEach(([key, idx]) => {
             const td = tr.children[idx];
-            td.innerHTML = `<input type="text" value="${td.textContent.trim()}" />`;
+            if (key === "status") {
+              td.innerHTML = `
+              <select>
+                <option value="Enter" ${
+                  td.textContent.trim() === "Enter" ? "selected" : ""
+                }>Enter</option>
+                <option value="Out" ${
+                  td.textContent.trim() === "Out" ? "selected" : ""
+                }>Out</option>
+              </select>
+            `;
+            } else {
+              td.innerHTML = `<input type="text" value="${td.textContent.trim()}" />`;
+            }
           });
+
           btn.textContent = "Save";
+
           // Thêm hiệu ứng cho ảnh
           // Chỉ bật hover cho ảnh của hàng đang edit
           const wrap = tr.querySelector(".avatar-wrapper");
           const overlay = wrap.querySelector(".change-overlay");
-          // wrap.addEventListener(
-          //   "mouseenter",
-          //   () => (overlay.style.opacity = "1")
-          // );
-          // wrap.addEventListener(
-          //   "mouseleave",
-          //   () => (overlay.style.opacity = "0")
-          // );
+
           // lưu handler để remove sau
           const enterHandler = () => (overlay.style.opacity = "1");
           const leaveHandler = () => (overlay.style.opacity = "0");
@@ -138,21 +150,43 @@ document.addEventListener("DOMContentLoaded", async () => {
         } else {
           // Lấy dữ liệu từ input
           const updatedData = {};
+
           Object.entries(editColumns).forEach(([key, idx]) => {
-            updatedData[key] = tr.children[idx]
-              .querySelector("input")
-              .value.trim();
+            if (key === "status") {
+              updatedData[key] = tr.children[idx].querySelector("select").value;
+            } else {
+              updatedData[key] = tr.children[idx]
+                .querySelector("input")
+                .value.trim();
+            }
           });
 
-          // Kiểm tra nếu dữ liệu không thay đổi → chỉ reset row
+          // So sánh với data-original
           const unchanged = Object.entries(editColumns).every(([key, idx]) => {
-            return tr.children[idx].textContent.trim() === updatedData[key];
+            return updatedData[key] === tr.children[idx].dataset.original;
           });
+          // Kiểm tra xem có file mới
+          const hasNewAvatar = tr._pendingAvatarFile instanceof File;
+
+          if (unchanged && !hasNewAvatar) {
+            // không cần gửi gì, chỉ reset UI
+            Object.entries(editColumns).forEach(([key, idx]) => {
+              tr.children[idx].textContent = updatedData[key];
+            });
+            btn.textContent = "Edit";
+            return;
+          }
+          // chuẩn bị FormData
+          const formData = new FormData();
+          Object.entries(updatedData).forEach(([key, value]) =>
+            formData.append(key, value)
+          );
 
           Object.entries(editColumns).forEach(([key, idx]) => {
             tr.children[idx].textContent = updatedData[key];
           });
           btn.textContent = "Edit";
+
           // Xóa listener hover khi edit xong
           if (tr._hoverHandlers) {
             const { enterHandler, leaveHandler } = tr._hoverHandlers;
@@ -162,35 +196,16 @@ document.addEventListener("DOMContentLoaded", async () => {
             tr._hoverHandlers = null;
           }
           //
-          //
-          if (unchanged) return; // không cần gửi request nếu ko đổi
-
           // Nếu có thay đổi, gửi request PUT
-          // try {
-          //   const res = await fetch(`/quanly/edit/${tr.dataset.id}`, {
-          //     method: "PUT",
-          //     headers: { "Content-Type": "application/json" },
-          //     body: JSON.stringify(updatedData),
-          //   });
-          //   const data = await res.json();
-          //   if (!data.success) {
-          //     alert(data.message);
-          //   }
-          // } catch (err) {
-          //   console.error(err);
-          //   alert("Lỗi khi cập nhật nhân viên");
-          // }
+
           try {
-            const formData = new FormData();
-
-            // Thêm các trường text
-            Object.entries(updatedData).forEach(([key, value]) => {
-              formData.append(key, value);
-            });
-
-            // Nếu có file ảnh mới thì thêm file
-            if (tr._pendingAvatarFile) {
-              formData.append("avatar", tr._pendingAvatarFile);
+            // Thêm file nếu có
+            if (tr._pendingAvatarFile instanceof File) {
+              formData.append(
+                "avatar",
+                tr._pendingAvatarFile,
+                tr._pendingAvatarFile.name
+              );
             }
 
             const res = await fetch(`/quanly/edit/${tr.dataset.id}`, {
@@ -199,10 +214,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
 
             const data = await res.json();
-            if (!data.success) {
-              alert(data.message);
-            } else {
-              console.log("Cập nhật thành công");
+            if (data.success) {
+              Object.entries(editColumns).forEach(([key, idx]) => {
+                tr.children[idx].textContent = updatedData[key];
+                tr.children[idx].dataset.original = updatedData[key]; // update luôn data-original
+              });
+              btn.textContent = "Edit";
             }
           } catch (err) {
             console.error(err);
