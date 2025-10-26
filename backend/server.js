@@ -190,6 +190,72 @@ app.post("/quanly/add", upload.single("avatar"), async (req, res) => {
       .json({ success: false, message: "Lỗi server khi thêm nhân viên" });
   }
 });
+// -------------
+// ✅ SEARCH nhân viên
+// ✅ SEARCH nhân viên
+app.post("/quanly/search", async (req, res) => {
+  try {
+    const { name, rank, position, plateArea, plateNum, status } = req.body;
+
+    // Tạo filter động
+    const query = {};
+
+    if (name && name.trim() !== "") {
+      query.name = { $regex: name.trim(), $options: "i" }; // tìm gần đúng, không phân biệt hoa thường
+    }
+    if (rank && rank.trim() !== "") {
+      query.rank = { $regex: rank.trim(), $options: "i" };
+    }
+    if (position && position.trim() !== "") {
+      query.position = { $regex: position.trim(), $options: "i" };
+    }
+    if (plateArea && plateArea.trim() !== "") {
+      query.plateArea = { $regex: plateArea.trim(), $options: "i" };
+    }
+    if (plateNum && plateNum.trim() !== "") {
+      query.plateNum = { $regex: plateNum.trim(), $options: "i" };
+    }
+    if (status && status !== "All") {
+      query.status = status;
+    }
+
+    const results = await staffCollection.find(query).toArray();
+
+    res.json({ success: true, results });
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .json({ success: false, message: "Lỗi server khi tìm kiếm" });
+  }
+});
+
+// // ✅ SEARCH nhân viên
+// app.get("/quanly/search", async (req, res) => {
+//   try {
+//     const { name = "", position = "" } = req.query;
+
+//     // Tạo điều kiện tìm kiếm (case-insensitive)
+//     const query = {};
+
+//     if (name.trim() !== "") {
+//       query.name = { $regex: name, $options: "i" }; // tìm theo chuỗi con
+//     }
+
+//     if (position.trim() !== "") {
+//       query.position = { $regex: position, $options: "i" };
+//     }
+
+//     const results = await staffCollection.find(query).toArray();
+
+//     res.json({ success: true, results });
+//   } catch (err) {
+//     console.error("❌ Lỗi khi search:", err);
+//     res
+//       .status(500)
+//       .json({ success: false, message: "Lỗi server khi tìm kiếm" });
+//   }
+// });
 
 //
 // ✅ Chạy server
