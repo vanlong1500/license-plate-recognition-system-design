@@ -232,4 +232,139 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error(err);
     tbody.innerHTML = `<tr><td colspan="8">Không thể load dữ liệu</td></tr>`;
   }
+  // ========== EXPORT FUNCTION DÙNG CHUNG ==========
+  window.attachQuanLyRowHandlers = function attachQuanLyRowHandlers(row) {
+    if (!row) return;
+
+    const editBtn = row.querySelector(".edit-btn");
+    const deleteBtn = row.querySelector(".delete-btn");
+    const tr = row;
+
+    // ====== DELETE ======
+    if (deleteBtn) {
+      deleteBtn.addEventListener("click", async (e) => {
+        e.preventDefault();
+        const id = deleteBtn.dataset.id;
+        try {
+          const res = await fetch(`/quanly/delete/${id}`, { method: "GET" });
+          const data = await res.json();
+          if (data.success) tr.remove();
+          else alert(data.message || "Xóa thất bại");
+        } catch (err) {
+          console.error(err);
+          alert("Lỗi khi xóa nhân viên");
+        }
+      });
+    }
+
+    // ====== EDIT ======
+    if (editBtn) {
+      editBtn.addEventListener("click", async (e) => {
+        e.preventDefault();
+
+        const isEditing = editBtn.textContent === "Save";
+        const editColumns = {
+          name: 1,
+          rank: 3,
+          position: 4,
+          plateArea: 5,
+          plateNum: 6,
+          status: 7,
+        };
+
+        if (!isEditing) {
+          // Chuyển sang edit mode
+          Object.entries(editColumns).forEach(([key, idx]) => {
+            const td = tr.children[idx];
+            if (key === "status") {
+              td.innerHTML = `
+              <select>
+                <option value="Enter" ${
+                  td.textContent.trim() === "Enter" ? "selected" : ""
+                }>Enter</option>
+                <option value="Out" ${
+                  td.textContent.trim() === "Out" ? "selected" : ""
+                }>Out</option>
+              </select>`;
+            } else {
+              td.innerHTML = `<input type="text" value="${td.textContent.trim()}" />`;
+            }
+          });
+
+          // thêm hiệu ứng đổi avatar (copy từ bạn)
+          const wrap = tr.querySelector(".avatar-wrapper");
+          const overlay = wrap.querySelector(".change-overlay");
+          const enterHandler = () => (overlay.style.opacity = "1");
+          const leaveHandler = () => (overlay.style.opacity = "0");
+          wrap.addEventListener("mouseenter", enterHandler);
+          wrap.addEventListener("mouseleave", leaveHandler);
+          tr._hoverHandlers = { enterHandler, leaveHandler };
+
+          const fileInput = document.createElement("input");
+          fileInput.type = "file";
+          fileInput.accept = "image/*";
+          fileInput.style.display = "none";
+          tr._pendingAvatarFile = null;
+          overlay.addEventListener("click", () => fileInput.click());
+          fileInput.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            tr._pendingAvatarFile = file;
+            const img = wrap.querySelector(".avatar-img");
+            const reader = new FileReader();
+            reader.onload = (ev) => (img.src = ev.target.result);
+            reader.readAsDataURL(file);
+          });
+          document.body.appendChild(fileInput);
+
+          editBtn.textContent = "Save";
+        } else {
+          // Lưu thay đổi
+          const updatedData = {};
+          Object.entries(editColumns).forEach(([key, idx]) => {
+            if (key === "status")
+              updatedData[key] = tr.children[idx].querySelector("select").value;
+            else
+              updatedData[key] = tr.children[idx]
+                .querySelector("input")
+                .value.trim();
+          });
+
+          const formData = new FormData();
+          Object.entries(updatedData).forEach(([k, v]) =>
+            formData.append(k, v)
+          );
+
+          if (tr._pendingAvatarFile instanceof File) {
+            formData.append("avatar", tr._pendingAvatarFile);
+          }
+
+          try {
+            const res = await fetch(`/quanly/edit/${tr.dataset.id}`, {
+              method: "PUT",
+              body: formData,
+            });
+            const data = await res.json();
+            if (data.success) {
+              Object.entries(editColumns).forEach(([k, idx]) => {
+                tr.children[idx].textContent = updatedData[k];
+                tr.children[idx].dataset.original = updatedData[k];
+              });
+              editBtn.textContent = "Edit";
+              if (tr._hoverHandlers) {
+                const { enterHandler, leaveHandler } = tr._hoverHandlers;
+                const wrap = tr.querySelector(".avatar-wrapper");
+                wrap.removeEventListener("mouseenter", enterHandler);
+                wrap.removeEventListener("mouseleave", leaveHandler);
+                tr._hoverHandlers = null;
+              }
+            }
+          } catch (err) {
+            console.error(err);
+            alert("Lỗi khi lưu chỉnh sửa");
+          }
+        }
+      });
+    }
+  };
 });

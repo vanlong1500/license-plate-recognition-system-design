@@ -1,4 +1,4 @@
-// add.js
+// // add.js
 document.addEventListener("DOMContentLoaded", () => {
   const addBtn = document.getElementById("add-btn");
   const tbody = document.querySelector("table tbody");
@@ -31,20 +31,20 @@ document.addEventListener("DOMContentLoaded", () => {
       }" /></td>
       <td>
         <div style="display:flex; gap:6px;">
-          <input name="area" type="text" class="form-control" placeholder="Mã khu vực (VD: 59A1)" 
+          <input name="area" type="text" class="form-control" placeholder="Mã khu vực (VD: 59A1)"
             value="${
               existing ? escapeHtml(existing.Plate?.area || "") : ""
             }" style="width:50%" />
-          
+
         </div>
       </td>
       <td>
         <div style="display:flex; gap:6px;">
-          <input name="number" type="text" class="form-control" placeholder="Số xe (VD: 12345)" 
+          <input name="number" type="text" class="form-control" placeholder="Số xe (VD: 12345)"
             value="${
               existing ? escapeHtml(existing.Plate?.number || "") : ""
             }" style="width:50%" />
-          
+
         </div>
       </td>
       <td>
@@ -158,10 +158,10 @@ document.addEventListener("DOMContentLoaded", () => {
       <img src="${escapeHtml(
         saved.avatar || ""
       )}" width="80" class="avatar-img" style="border-radius:8px; object-fit:cover;">
-      <div class="change-overlay" 
-          style="position:absolute; top:0; left:0; width:100%; height:100%; 
-                  display:flex; align-items:center; justify-content:center; 
-                  background: rgba(0,0,0,0.6); color:white; font-size:12px; 
+      <div class="change-overlay"
+          style="position:absolute; top:0; left:0; width:100%; height:100%;
+                  display:flex; align-items:center; justify-content:center;
+                  background: rgba(0,0,0,0.6); color:white; font-size:12px;
                   opacity:0; transition:0.3s; cursor:pointer;">
         +
       </div>
@@ -331,3 +331,129 @@ document.addEventListener("DOMContentLoaded", () => {
     window.attachQuanLyRowHandlers(r);
   });
 });
+// ---------------------------------------------------------
+// Chỉ Thêm nhân viên (Ko edit + delete)
+// document.addEventListener("DOMContentLoaded", () => {
+//   const addBtn = document.getElementById("add-btn");
+//   const tbody = document.querySelector("table tbody");
+
+//   // Escape helper
+//   function escapeHtml(s = "") {
+//     return String(s).replace(
+//       /[&<>"']/g,
+//       (m) =>
+//         ({
+//           "&": "&amp;",
+//           "<": "&lt;",
+//           ">": "&gt;",
+//           '"': "&quot;",
+//           "'": "&#39;",
+//         }[m])
+//     );
+//   }
+
+//   addBtn.addEventListener("click", (e) => {
+//     e.preventDefault();
+
+//     // Nếu đang có hàng mới -> không thêm thêm
+//     if (tbody.querySelector("tr[data-new='true']")) return;
+
+//     const tr = document.createElement("tr");
+//     tr.dataset.new = "true";
+//     tr.innerHTML = `
+//       <td>#</td>
+//       <td><input name="name" type="text" placeholder="Tên nhân viên" /></td>
+//       <td><input name="avatar" type="file" accept="image/*" /></td>
+//       <td><input name="rank" type="text" placeholder="Cấp bậc" /></td>
+//       <td><input name="position" type="text" placeholder="Chức vụ" /></td>
+//       <td><input name="plateArea" type="text" placeholder="Mã KV (VD: 59A1)" /></td>
+//       <td><input name="plateNum" type="text" placeholder="Số xe" /></td>
+//       <td>
+//         <select name="status">
+//           <option value="Enter">Enter</option>
+//           <option value="Out">Out</option>
+//         </select>
+//       </td>
+//       <td>
+//         <a href="#" class="save-btn">Save</a>
+//         <a href="#" class="cancel-btn">Cancel</a>
+//       </td>
+//     `;
+//     tbody.prepend(tr);
+
+//     const saveBtn = tr.querySelector(".save-btn");
+//     const cancelBtn = tr.querySelector(".cancel-btn");
+
+//     cancelBtn.addEventListener("click", (e) => {
+//       e.preventDefault();
+//       tr.remove();
+//     });
+
+//     saveBtn.addEventListener("click", async (e) => {
+//       e.preventDefault();
+
+//       const fd = new FormData();
+//       ["name", "rank", "position", "plateArea", "plateNum", "status"].forEach(
+//         (f) => {
+//           fd.append(f, tr.querySelector(`[name="${f}"]`).value.trim());
+//         }
+//       );
+
+//       const fileInput = tr.querySelector('[name="avatar"]');
+//       if (fileInput.files[0]) fd.append("avatar", fileInput.files[0]);
+
+//       try {
+//         const res = await fetch("/quanly/add", { method: "POST", body: fd });
+//         const data = await res.json();
+
+//         if (!res.ok || !data.success) {
+//           alert(data.message || "Thêm nhân viên thất bại");
+//           return;
+//         }
+
+//         const s = data.staff;
+//         const newTr = document.createElement("tr");
+//         newTr.dataset.id = s._id;
+//         newTr.innerHTML = `
+//           <td></td>
+//           <td data-original="${escapeHtml(s.name)}">${escapeHtml(s.name)}</td>
+//           <td class="avatar-cell">
+//             <div class="avatar-wrapper" style="position:relative; display:inline-block;">
+//               <img src="${escapeHtml(
+//                 s.avatar || ""
+//               )}" width="80" class="avatar-img" style="border-radius:8px; object-fit:cover;">
+//               <div class="change-overlay" style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.6); color:white; opacity:0; transition:0.3s; cursor:pointer;">+</div>
+//             </div>
+//           </td>
+//           <td data-original="${escapeHtml(s.rank)}">${escapeHtml(s.rank)}</td>
+//           <td data-original="${escapeHtml(s.position)}">${escapeHtml(
+//           s.position
+//         )}</td>
+//           <td data-original="${escapeHtml(s.plateArea || "")}">${escapeHtml(
+//           s.plateArea || ""
+//         )}</td>
+//           <td data-original="${escapeHtml(s.plateNum || "")}">${escapeHtml(
+//           s.plateNum || ""
+//         )}</td>
+//           <td data-original="${escapeHtml(s.status || "None")}">${escapeHtml(
+//           s.status || "None"
+//         )}</td>
+//           <td>
+//             <a href="#" class="edit-btn">Edit</a>
+//             <a href="#" class="delete-btn" data-id="${escapeHtml(
+//               s._id
+//             )}">Delete</a>
+//           </td>
+//         `;
+
+//         tr.replaceWith(newTr);
+//         if (typeof window.attachQuanLyRowHandlers === "function") {
+//           window.attachQuanLyRowHandlers(newTr);
+//         }
+//       } catch (err) {
+//         console.error(err);
+//         alert("Lỗi mạng khi thêm nhân viên");
+//       }
+//     });
+//   });
+// });
