@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const tbody = document.querySelector("table tbody");
 
   try {
-    const res = await fetch("/api/staff");
+    const res = await fetch("http://127.0.0.1:5001/api/staff");
     const staffList = await res.json();
 
     if (!staffList || staffList.length === 0) {
@@ -53,7 +53,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         // if (!confirm("Bạn có chắc muốn xóa nhân viên này không?")) return;
 
         try {
-          const res = await fetch(`/quanly/delete/${id}`, { method: "GET" });
+          const res = await fetch(`http://127.0.0.1:5001/quanly/delete/${id}`, {
+            method: "GET",
+          });
           if (!res.ok) throw new Error("Server trả lỗi");
           const data = await res.json();
 
@@ -208,10 +210,13 @@ document.addEventListener("DOMContentLoaded", async () => {
               );
             }
 
-            const res = await fetch(`/quanly/edit/${tr.dataset.id}`, {
-              method: "PUT",
-              body: formData, // không cần header JSON nữa
-            });
+            const res = await fetch(
+              `http://127.0.0.1:5001/quanly/edit/${tr.dataset.id}`,
+              {
+                method: "PUT",
+                body: formData, // không cần header JSON nữa
+              }
+            );
 
             const data = await res.json();
             if (data.success) {
@@ -246,7 +251,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         e.preventDefault();
         const id = deleteBtn.dataset.id;
         try {
-          const res = await fetch(`/quanly/delete/${id}`, { method: "GET" });
+          const res = await fetch(`http://127.0.0.1:5001/quanly/delete/${id}`, {
+            method: "GET",
+          });
           const data = await res.json();
           if (data.success) tr.remove();
           else alert(data.message || "Xóa thất bại");
@@ -340,10 +347,13 @@ document.addEventListener("DOMContentLoaded", async () => {
           }
 
           try {
-            const res = await fetch(`/quanly/edit/${tr.dataset.id}`, {
-              method: "PUT",
-              body: formData,
-            });
+            const res = await fetch(
+              `http://127.0.0.1:5001/quanly/edit/${tr.dataset.id}`,
+              {
+                method: "PUT",
+                body: formData,
+              }
+            );
             const data = await res.json();
             if (data.success) {
               Object.entries(editColumns).forEach(([k, idx]) => {

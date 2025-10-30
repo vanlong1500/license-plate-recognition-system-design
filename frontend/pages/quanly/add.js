@@ -129,7 +129,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       try {
-        const res = await fetch("/quanly/add", {
+        const res = await fetch("http://127.0.0.1:5001/quanly/add", {
           method: "POST",
           body: fd,
         });
@@ -218,7 +218,9 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       if (!confirm("Bạn có chắc muốn xóa nhân viên này không?")) return;
       try {
-        const res = await fetch(`/quanly/delete/${id}`, { method: "GET" });
+        const res = await fetch(`http://127.0.0.1:5001/quanly/delete/${id}`, {
+          method: "GET",
+        });
         const data = await res.json();
         if (data.success) {
           tr.remove();
@@ -292,7 +294,7 @@ document.addEventListener("DOMContentLoaded", () => {
           });
           editBtn.textContent = "Edit";
           try {
-            await fetch(`/quanly/edit/${tr.dataset.id}`, {
+            await fetch(`http://127.0.0.1:5001/quanly/edit/${tr.dataset.id}`, {
               method: "PUT",
               body: new FormData(
                 Object.entries(updated).reduce((fd, [k, v]) => {
@@ -314,7 +316,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const id = deleteBtn.dataset.id;
         // if (!confirm("Bạn có chắc muốn xóa nhân viên này không?")) return;
         try {
-          const res = await fetch(`/quanly/delete/${id}`, { method: "GET" });
+          const res = await fetch(`http://127.0.0.1:5001/quanly/delete/${id}`, {
+            method: "GET",
+          });
           const data = await res.json();
           if (data.success) deleteBtn.closest("tr").remove();
           else alert(data.message || "Xóa thất bại");
