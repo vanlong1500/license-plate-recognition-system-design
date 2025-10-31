@@ -50,7 +50,11 @@
       <!-- ============================================================== -->
       <!-- Left Sidebar - style you can find in sidebar.scss  -->
       <!-- ============================================================== -->
-      <aside class="left-sidebar" data-sidebarbg="skin5">
+      <aside
+        class="left-sidebar"
+        data-sidebarbg="skin5"
+        style="padding-top: 0; position: fixed; top: 0; left: 0"
+      >
         <!-- Sidebar scroll-->
         <div class="scroll-sidebar">
           <!-- Sidebar navigation-->
@@ -143,23 +147,62 @@
                   <div class="row">
                     <div class="col-md-3">
                       <div class="form-group">
+                        <label>Tên nhân viên:</label>
+                        <input
+                          type="text"
+                          class="form-control hide"
+                          id="_id"
+                          name="_id"
+                          value=""
+                        />
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="name"
+                          name="name"
+                          placeholder="Nhập tên nhân viên..."
+                        />
+                        <div
+                          id="autocompleteList"
+                          class="autocomplete-items"
+                        ></div>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="form-group">
                         <label>Từ ngày:</label>
-                        <input type="date" class="form-control" id="fromDate" />
+                        <input
+                          type="date"
+                          name="Start_day"
+                          class="form-control"
+                          id="fromDate"
+                          required
+                        />
                       </div>
                     </div>
                     <div class="col-md-3">
                       <div class="form-group">
                         <label>Đến ngày:</label>
-                        <input type="date" class="form-control" id="toDate" />
+                        <input
+                          type="date"
+                          name="End_day"
+                          class="form-control"
+                          id="toDate"
+                          required
+                        />
                       </div>
                     </div>
                     <div class="col-md-3">
                       <div class="form-group">
                         <label>Trạng thái:</label>
-                        <select class="form-control" id="statusFilter">
+                        <select
+                          class="form-control"
+                          name="status"
+                          id="statusFilter"
+                        >
                           <option value="">Tất cả</option>
-                          <option value="vao">Vào</option>
-                          <option value="ra">Ra</option>
+                          <option value="Enter">Vào</option>
+                          <option value="Out">Ra</option>
                         </select>
                       </div>
                     </div>
@@ -169,15 +212,15 @@
                         <div>
                           <button
                             type="button"
+                            id="find"
                             class="btn btn-primary"
-                            onclick="filterData()"
                           >
                             <i class="mdi mdi-filter"></i> Lọc
                           </button>
                           <button
                             type="button"
                             class="btn btn-success"
-                            onclick="exportData()"
+                            id="exportExcelBtn"
                           >
                             <i class="mdi mdi-download"></i> Xuất Excel
                           </button>
@@ -191,7 +234,7 @@
           </div>
 
           <!-- Thống kê tổng quan -->
-          <div class="row">
+          <!-- <div class="row">
             <div class="col-md-3">
               <div class="card">
                 <div class="card-body">
@@ -276,7 +319,7 @@
                 </div>
               </div>
             </div>
-          </div>
+          </div> -->
 
           <!-- Bảng danh sách xe -->
           <div class="row">
@@ -289,13 +332,14 @@
                     <h4 class="card-title">Danh sách xe ra vào</h4>
                     <div>
                       <input
-                        type="text"
-                        class="form-control d-inline-block"
+                        type="number"
+                        class="find_plate d-inline-block p-1"
                         style="width: 200px"
                         placeholder="Tìm kiếm biển số..."
-                        id="searchInput"
-                        onkeyup="searchTable()"
                       />
+                      <button class="btn btn-primary" id="searchInput">
+                        <i class="mdi mdi-magnify"></i>
+                      </button>
                     </div>
                   </div>
 
@@ -307,13 +351,12 @@
                       <thead class="thead-dark">
                         <tr>
                           <th>STT</th>
+                          <th>Thời gian</th>
                           <th>Biển số xe</th>
                           <th>Tên lái xe</th>
-                          <th>Cấp bậc</th>
                           <th>Chức vụ</th>
-                          <th>Thời gian</th>
                           <th>Trạng thái</th>
-                          <th>Ghi chú</th>
+                          <th>Cảnh báo</th>
                         </tr>
                       </thead>
                       <tbody id="vehicleTableBody">
@@ -323,22 +366,6 @@
                   </div>
 
                   <!-- Phân trang -->
-                  <div
-                    class="d-flex justify-content-between align-items-center mt-3"
-                  >
-                    <div>
-                      <span
-                        >Hiển thị <span id="showingFrom">1</span> đến
-                        <span id="showingTo">10</span> trong tổng số
-                        <span id="totalRecords">0</span> bản ghi</span
-                      >
-                    </div>
-                    <nav>
-                      <ul class="pagination" id="pagination">
-                        <!-- Phân trang sẽ được tạo bằng JavaScript -->
-                      </ul>
-                    </nav>
-                  </div>
                 </div>
               </div>
             </div>
@@ -383,6 +410,8 @@
     <script src="../../dist/js/custom.min.js"></script>
     <!--This page JavaScript -->
     <!-- Custom JavaScript cho trang thống kê -->
-    <script src="thongke.js"></script>
+    <script type="module" src="thongke_y.js"></script>
+
+    <!-- <script src="thongke.js"></script> -->
   </body>
 </html>

@@ -4,7 +4,7 @@ from test_new_model import process_frame, CameraStream
 from pymongo import MongoClient
 from datetime import datetime
 from flask_cors import CORS
-from api import get_latest_10_data ,edit_home,data_enter
+from api import *
 
 
 app = Flask(__name__)
@@ -126,7 +126,7 @@ get_newdata = None
 def get_data():
     global get_data
     get_newdata = get_latest_10_data()
-    return(get_newdata)
+    return (get_newdata)
 
 @app.route("/dataNew" , methods=["GET"])
 def data_new():
@@ -153,6 +153,12 @@ def data_new_status():
     if data is None:
         return jsonify("không có data")
     return jsonify(data)
+# delete pls
+@app.route("/delPts" , methods=["DELETE"])
+def delete_plate():
+    data = request.json
+    delete_inf_pls(data)
+    return("delete : ok")
 
 # edit information plates
 @app.route("/api/home/edit" , methods=["PUT"])
@@ -169,6 +175,24 @@ def edit_sta_Home():
     global get_data
     get_newdata = get_latest_10_data()
     return(get_newdata)
+
+
+
+# thống kê 
+@app.route("/api/employees/all")
+def find_emp():
+    data = find_all_emp()
+    return jsonify(data)
+@app.route("/api/listFindInf" ,methods=["PUT"])
+def list_find_inf():
+    dataRP= request.json
+    find_data=find_data_plates(dataRP)
+    return jsonify(find_data)
+@app.route("/api/plsMB" ,methods=["PUT"])
+def list_find_plsNB():
+    dataPlsNb= request.json
+    find_pls=find_plsNB(dataPlsNb)
+    return jsonify(find_pls)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

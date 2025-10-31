@@ -11,16 +11,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         mng_plates();
       });
       document.getElementById("enter").addEventListener("click", () => {
-        page = 1;
-        sta = 1;
+        const page = 1;
+        const sta = 1;
         mng_Nb(sta, page);
         // lấy id
         const clk = document.getElementById("pagination-controls");
         clk.classList.remove("hide");
       });
       document.getElementById("out").addEventListener("click", () => {
-        page = 1;
-        sta = 2;
+        const page = 1;
+        const sta = 2;
         mng_Nb(sta, page);
         const clk = document.getElementById("pagination-controls");
         clk.classList.remove("hide");
@@ -103,7 +103,6 @@ async function mng_plates() {
   try {
     const main = await fetch("http://127.0.0.1:5000/dataNew");
     const data = await main.json();
-    console.log(data);
     const tableBody = document.getElementById("recentVehiclesTable");
     tableBody.innerHTML = ""; // Xóa dữ liệu cũ
 
@@ -178,7 +177,11 @@ function edit_home(sta) {
 
       button.classList.add("hide");
       const saveButton = row.querySelector(".save-btn");
+      const deleteButton = row.querySelector(".delete-btn");
+
       saveButton.classList.remove("hide");
+      deleteButton.classList.remove("hide");
+
       saveButton.addEventListener("click", async () => {
         const data = {};
         save_edits.forEach((save_edit) => {
@@ -231,6 +234,38 @@ function edit_home(sta) {
         } catch (err) {
           console.error(err);
           alert("Lỗi khi cập nhật nhân viên");
+        }
+      });
+      deleteButton.addEventListener("click", async () => {
+        const userConfirmed = confirm(
+          "Bạn có chắc chắn muốn xoá thông tin này không?"
+        );
+        if (userConfirmed) {
+          alert("Thông tin đang được xoá...");
+          const data = {};
+          save_edits.forEach((save_edit) => {
+            data[save_edit.name] = save_edit.value;
+          });
+          const res = await fetch(`http://127.0.0.1:5000/delPts`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+          if (res.ok) {
+            alert("xoá dữ liệu thành công");
+          }
+        } else {
+          const errorData = await res.json();
+          alert(
+            `❌ Lỗi xoá dữ liệu (${res.status}): ${
+              errorData.message || "Lỗi không xác định."
+            }`
+          );
+        }
+        if (sta == 0) {
+          mng_plates();
+        } else {
+          mng_Nb(sta);
         }
       });
     });
@@ -323,7 +358,13 @@ function renderPagination(sta, pagination) {
   });
 }
 // Tạo badge trạng thái
-function createStatusBadge(item, index, formattedTime, hasInfo, tableBody) {
+export function createStatusBadge(
+  item,
+  index,
+  formattedTime,
+  hasInfo,
+  tableBody
+) {
   const row = `
       <tr>
         <td>${index + 1}</td>
@@ -335,15 +376,15 @@ function createStatusBadge(item, index, formattedTime, hasInfo, tableBody) {
         </td>
         <td> khu vực : <input class="edit edit_new " name="plateArea" type="text" value="${
           item.plateArea || ""
-        }" style="display:inline-block; width:20%; padding:0" readonly>
+        }" style="display:inline-block; width:20%; padding:0" readonly required>
           biển số : <input class="edit edit_new" name="plateNum" type="number" value="${
             item.plateNum || ""
-          }" style="display:inline-block; width:35%;" readonly></td>
+          }" style="display:inline-block; width:35%;" readonly required></td>
         <td style="width:200px"><input class="edit edit_new" name="${
           item.name ? "name" : item.no_data ? "no_data" : "unknown"
         }" type="text" value="${item.name || item.no_data || ""}" style="${
     hasInfo ? "color: red; font-weight: bold;" : ""
-  }" readonly></td>
+  }" readonly required></td>
         <td >
   <div class="d-flex justify-content-between" style="gap: 4%;">
     <input class="form-control edit edit_new"
@@ -361,7 +402,7 @@ function createStatusBadge(item, index, formattedTime, hasInfo, tableBody) {
   </div>
 </td>
         <td>
-          <select class="form-select edit statue-select" style="display:inline-block; width:100px;padding:4px;" name="status" disabled>
+          <select class="form-select edit statue-select" style="display:inline-block; width:100px;padding:4px;" name="status" disabled >
             <option style="background-color: green;" value="Enter" ${
               item.status === "Enter" ? "selected" : ""
             }>Vào</option>
@@ -376,12 +417,14 @@ function createStatusBadge(item, index, formattedTime, hasInfo, tableBody) {
           }" style="${
     hasInfo ? "color: red; font-weight: bold;" : ""
   }" readonly></td>
-        <td>
+        <td style="width: 135px" class="note_ed">
           ${
             hasInfo
               ? `
             <button class="btn btn-warning edit-btn">Sửa</button>
             <button class="btn btn-warning save-btn hide">lưu</button>
+            <button class="btn btn-danger delete-btn hide ">Xoá</button>
+
             `
               : `
             <button class="btn btn-warning edit-btn hide">Sửa</button>

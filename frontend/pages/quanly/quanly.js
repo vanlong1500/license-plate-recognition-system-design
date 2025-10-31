@@ -36,8 +36,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         <td data-original="${s.plateNum || ""}">${s.plateNum || ""}</td>
         <td data-original="${s.status || "None"}">${s.status || "None"}</td>
         <td>
-          <a href="#" class="edit-btn">Edit</a>
-          <a href="#" class="delete-btn" data-id="${s._id}">Delete</a>
+          <a href="#" class="btn btn-primary edit-btn" style="padding:8px 16px">Edit</a>
+          <a href="#" class="btn btn-danger delete-btn" style="padding:8px 16px" data-id="${
+            s._id
+          }">Delete</a>
         </td>
       </tr>
     `
