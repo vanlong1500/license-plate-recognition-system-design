@@ -18,9 +18,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         <td data-original="${s.name}">${s.name}</td>
         <td class="avatar-cell">
           <div class="avatar-wrapper" style="position: relative; display: inline-block;">
-            <img src="${
+            <img src="http://127.0.0.1:5001${
               s.avatar
-            }" width="80" class="avatar-img" style="border-radius: 8px; object-fit: cover;">
+            }" width="80" class="avatar-img" style="border-radius: 8px; object-fit: cover; width: 80px; height: 80px;">
             <div class="change-overlay" 
                 style="position: absolute; top:0; left:0; width:100%; height:100%; 
                         display:flex; align-items:center; justify-content:center; 
@@ -36,10 +36,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         <td data-original="${s.plateNum || ""}">${s.plateNum || ""}</td>
         <td data-original="${s.status || "None"}">${s.status || "None"}</td>
         <td>
-          <a href="#" class="btn btn-primary edit-btn" style="padding:8px 16px">Edit</a>
-          <a href="#" class="btn btn-danger delete-btn" style="padding:8px 16px" data-id="${
+          <a href="#" class="btn btn-primary edit-btn" style="padding:8px 16px; margin-bottom:4px">Sửa</a>
+          <a href="#" class="btn btn-danger delete-btn" style="padding:8px 16px; margin-bottom:4px" data-id="${
             s._id
-          }">Delete</a>
+          }">Xóa</a>
         </td>
       </tr>
     `
@@ -96,12 +96,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (key === "status") {
               td.innerHTML = `
               <select>
-                <option value="Enter" ${
-                  td.textContent.trim() === "Enter" ? "selected" : ""
-                }>Enter</option>
-                <option value="Out" ${
-                  td.textContent.trim() === "Out" ? "selected" : ""
-                }>Out</option>
+                <option value="Vào" ${
+                  td.textContent.trim() === "Vào" ? "selected" : ""
+                }>Vào</option>
+                <option value="Ra" ${
+                  td.textContent.trim() === "Ra" ? "selected" : ""
+                }>Ra</option>
               </select>
             `;
             } else {
@@ -288,12 +288,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (key === "status") {
               td.innerHTML = `
               <select>
-                <option value="Enter" ${
-                  td.textContent.trim() === "Enter" ? "selected" : ""
-                }>Enter</option>
-                <option value="Out" ${
-                  td.textContent.trim() === "Out" ? "selected" : ""
-                }>Out</option>
+                <option value="Vào" ${
+                  td.textContent.trim() === "Vào" ? "selected" : ""
+                }>Vào</option>
+                <option value="Ra" ${
+                  td.textContent.trim() === "Ra" ? "selected" : ""
+                }>Ra</option>
               </select>`;
             } else {
               td.innerHTML = `<input type="text" value="${td.textContent.trim()}" />`;

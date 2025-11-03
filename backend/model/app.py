@@ -15,10 +15,10 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 
 
 # mở camera
-rtsp_url = "http://192.168.1.146:8080/video"
-stream = CameraStream(rtsp_url)
-rtsp_url2 = "http://192.168.1.105:8080/video"
-stream2 = CameraStream(rtsp_url2)
+# rtsp_url = "http://192.168.1.146:8080/video"
+# stream = CameraStream(rtsp_url)
+# rtsp_url2 = "http://192.168.1.105:8080/video"
+# stream2 = CameraStream(rtsp_url2)
 
 def generate_frames(stream,status):
     while True:
@@ -54,12 +54,12 @@ def generate_frames2(stream,status):
 def index():
     return send_from_directory(app.static_folder, "index.html")
 
-@app.route("/video")
-def video():
-    return Response(generate_frames(stream,True), mimetype="multipart/x-mixed-replace; boundary=frame")
-@app.route("/video2")
-def video2():
-    return Response(generate_frames2(stream2,False), mimetype="multipart/x-mixed-replace; boundary=frame")
+# @app.route("/video")
+# def video():
+#     return Response(generate_frames(stream,True), mimetype="multipart/x-mixed-replace; boundary=frame")
+# @app.route("/video2")
+# def video2():
+#     return Response(generate_frames2(stream2,False), mimetype="multipart/x-mixed-replace; boundary=frame")
 
 # kết nối MongoDB
 client = MongoClient("mongodb://localhost:27017")
@@ -186,6 +186,7 @@ def data_new_status():
 def delete_plate():
     data = request.json
     delete_inf_pls(data)
+    get_data()
     return("delete : ok")
 
 # edit information plates

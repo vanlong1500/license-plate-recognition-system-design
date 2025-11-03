@@ -242,6 +242,7 @@ function edit_home(sta) {
               input.setAttribute("readonly", true);
               input.style.backgroundColor = "transparent";
             });
+            select.setAttribute("disabled", true);
             // Ẩn nút lưu và hiện lại nút sửa
             saveButton.classList.add("hide");
             button.classList.remove("hide");
@@ -273,13 +274,13 @@ function edit_home(sta) {
           console.error(err);
           alert("Lỗi khi cập nhật nhân viên");
         }
+        deleteButton.classList.add("hide");
       });
       deleteButton.addEventListener("click", async () => {
         const userConfirmed = confirm(
           "Bạn có chắc chắn muốn xoá thông tin này không?"
         );
         if (userConfirmed) {
-          alert("Thông tin đang được xoá...");
           const data = {};
           save_edits.forEach((save_edit) => {
             data[save_edit.name] = save_edit.value;
