@@ -186,7 +186,7 @@ def draw_plate(frame, x1, y1, x2, y2, stable_text):
         cv2.putText(frame, stable_text, (text_x, text_y),
                     cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 3)  # chữ trắng
 # 
-def process_frame(frame,status, conf_thresh=0.3):
+def process_frame2(frame,status, conf_thresh=0.3):
     """Xử lý 1 frame, trả về frame vẽ + danh sách biển số"""
     results = model(frame, verbose=False)
     detected_plates = []

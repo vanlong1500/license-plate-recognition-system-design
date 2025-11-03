@@ -1,6 +1,9 @@
 from flask import Flask, Response, send_from_directory, request, jsonify
 import cv2
 from test_new_model import process_frame, CameraStream  
+from test_new_model_2 import process_frame2, CameraStream  
+import json        
+import time 
 from pymongo import MongoClient
 from datetime import datetime
 from flask_cors import CORS
@@ -12,37 +15,51 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 
 
 # mở camera
-# rtsp_url = "http://192.168.1.27:8080/video"
-# stream = CameraStream(rtsp_url)
-# rtsp_url2 = "http://192.168.1.27:8080/video"
-# stream2 = CameraStream(rtsp_url2)
+rtsp_url = "http://192.168.1.146:8080/video"
+stream = CameraStream(rtsp_url)
+rtsp_url2 = "http://192.168.1.105:8080/video"
+stream2 = CameraStream(rtsp_url2)
 
-# def generate_frames(stream,status):
-#     while True:
-#         ret, frame = stream.read()
-#         if not ret:
-#             continue
+def generate_frames(stream,status):
+    while True:
+        ret, frame = stream.read()
+        if not ret:
+            continue
 
-#         # xử lý frame bằng plate.py
-#         frame, detected_plates, has_plate = process_frame(frame,status, 0.3)
+        # xử lý frame bằng plate.py
+        frame, detected_plates, has_plate = process_frame(frame,status, 0.3)
 
-#         # encode sang JPEG để stream
-#         ret, buffer = cv2.imencode('.jpg', frame)
-#         frame = buffer.tobytes()
+        # encode sang JPEG để stream
+        ret, buffer = cv2.imencode('.jpg', frame)
+        frame = buffer.tobytes()
 
-#         yield (b'--frame\r\n'
-#                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+def generate_frames2(stream,status):
+    while True:
+        ret, frame = stream.read()
+        if not ret:
+            continue
 
+        # xử lý frame bằng plate.py
+        frame, detected_plates, has_plate = process_frame2(frame,status, 0.3)
+
+        # encode sang JPEG để stream
+        ret, buffer = cv2.imencode('.jpg', frame)
+        frame = buffer.tobytes()
+
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 @app.route("/")
 def index():
     return send_from_directory(app.static_folder, "index.html")
 
-# @app.route("/video")
-# def video():
-#     return Response(generate_frames(stream,status), mimetype="multipart/x-mixed-replace; boundary=frame")
-# @app.route("/video2")
-# def video2():
-#     return Response(generate_frames(stream2,status), mimetype="multipart/x-mixed-replace; boundary=frame")
+@app.route("/video")
+def video():
+    return Response(generate_frames(stream,True), mimetype="multipart/x-mixed-replace; boundary=frame")
+@app.route("/video2")
+def video2():
+    return Response(generate_frames2(stream2,False), mimetype="multipart/x-mixed-replace; boundary=frame")
 
 # kết nối MongoDB
 client = MongoClient("mongodb://localhost:27017")
@@ -122,18 +139,29 @@ def info():
 latest_result = None  # danh sách lưu các biển số nhận dạng được gần nhất
 
 get_newdata = None
+
 @app.route("/update_plate", methods=["POST"])
 def get_data():
-    global get_data
+    global get_newdata
     get_newdata = get_latest_10_data()
-    return (get_newdata)
+    return ({"ok"})
 
 @app.route("/dataNew" , methods=["GET"])
 def data_new():
-    data = get_data()
-    if data is None:
-        return jsonify("không có data")
-    return jsonify(data)
+    get_data()
+    initial_data = json.dumps(get_newdata or [])
+    def event_stream():
+        global get_newdata
+        last_data_str = initial_data
+        yield f"data: {initial_data}\n\n"
+        while True:
+            if get_newdata is not None:
+                data_str = json.dumps(get_newdata)
+                if data_str != last_data_str:
+                    last_data_str = data_str
+                    yield f"data: {data_str}\n\n"
+            time.sleep(1)
+    return Response(event_stream(), mimetype="text/event-stream")
 
 @app.route("/status" , methods=["POST"])
 def data_new_status():

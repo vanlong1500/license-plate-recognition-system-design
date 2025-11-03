@@ -1,34 +1,42 @@
+let eventSource = null; // Giữ kết nối SSE toàn cục
+let platesInterval = null; // Dự phòng nếu muốn giữ interval cũ
+
 document.addEventListener("DOMContentLoaded", async () => {
-  fetch("./html/camera.html")
-    .then((response) => {
-      if (!response.ok) throw new Error("Không thể tải camera.html");
-      return response.text();
-    })
-    .then((html) => {
-      document.getElementById("home").innerHTML = html;
+  try {
+    const response = await fetch("./html/camera.html");
+    if (!response.ok) throw new Error("Không thể tải camera.html");
+    const html = await response.text();
+    document.getElementById("home").innerHTML = html;
+
+    // Khi load trang, bắt đầu nhận dữ liệu real-time từ backend
+    mng_plates();
+
+    // Nút tổng hợp
+    document.getElementById("sum").addEventListener("click", () => {
+      stopPlatesStream();
       mng_plates();
-      document.getElementById("sum").addEventListener("click", () => {
-        mng_plates();
-      });
-      document.getElementById("enter").addEventListener("click", () => {
-        const page = 1;
-        const sta = 1;
-        mng_Nb(sta, page);
-        // lấy id
-        const clk = document.getElementById("pagination-controls");
-        clk.classList.remove("hide");
-      });
-      document.getElementById("out").addEventListener("click", () => {
-        const page = 1;
-        const sta = 2;
-        mng_Nb(sta, page);
-        const clk = document.getElementById("pagination-controls");
-        clk.classList.remove("hide");
-      });
-    })
-    .catch((error) => {
-      console.error("Lỗi khi load file:", error);
     });
+
+    // Nút xe vào
+    document.getElementById("enter").addEventListener("click", () => {
+      stopPlatesStream(); // ❌ Tắt SSE
+      const page = 1;
+      const sta = 1;
+      mng_Nb(sta, page);
+      document.getElementById("pagination-controls").classList.remove("hide");
+    });
+
+    // Nút xe ra
+    document.getElementById("out").addEventListener("click", () => {
+      stopPlatesStream(); // ❌ Tắt SSE
+      const page = 1;
+      const sta = 2;
+      mng_Nb(sta, page);
+      document.getElementById("pagination-controls").classList.remove("hide");
+    });
+  } catch (error) {
+    console.error("Lỗi khi load file:", error);
+  }
 });
 async function mng_Nb(sta, page) {
   try {
@@ -99,57 +107,85 @@ async function mng_Nb(sta, page) {
     console.error("Lỗi khi tải dữ liệu mới:", error);
   }
 }
-async function mng_plates() {
-  try {
-    const main = await fetch("http://127.0.0.1:5000/dataNew");
-    const data = await main.json();
-    const tableBody = document.getElementById("recentVehiclesTable");
-    tableBody.innerHTML = ""; // Xóa dữ liệu cũ
-
-    data.forEach((item, index) => {
-      const hasInfo =
-        (item.no_data && item.no_data.trim() !== "") ||
-        (item.note && item.note.trim() !== "");
-      let formattedTime = "";
-      if (item.time) {
-        try {
-          // 1. Thêm 'Z' vào cuối chuỗi để JavaScript nhận diện đây là thời gian UTC
-          const timeAsUTC = item.time + "Z";
-
-          formattedTime = new Date(timeAsUTC).toLocaleString("vi-VN", {
-            timeZone: "Asia/Ho_Chi_Minh",
-            hour12: false, // dùng 24h
-
-            // 2. PHẢI CÓ: Các tùy chọn định dạng đầy đủ
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-          });
-        } catch (e) {
-          // Nếu chuyển đổi thất bại, giữ nguyên giá trị gốc
-          formattedTime = item.time;
-        }
-      }
-      createStatusBadge(item, index, formattedTime, hasInfo, tableBody);
-    });
-    document.querySelectorAll(".statue-select").forEach((select) => {
-      const value = select.value;
-      if (value === "vào") {
-        select.style.backgroundColor = "green";
-        select.style.color = "white";
-      } else if (value === "ra") {
-        select.style.backgroundColor = "red";
-        select.style.color = "white";
-      }
-    });
-    // hàm chỉnh sửa
-    edit_home(0);
-  } catch (error) {
-    console.error("Lỗi khi tải dữ liệu mới:", error);
+// ======================== SSE REAL-TIME =========================
+function startPlatesStream() {
+  if (eventSource) {
+    eventSource.close(); // đóng nếu đã tồn tại
   }
+  eventSource = new EventSource("http://127.0.0.1:5000/dataNew");
+
+  eventSource.onmessage = function (event) {
+    const data = JSON.parse(event.data);
+    console.log("📡 Dữ liệu mới từ BE:", data);
+    renderPlatesTable(data);
+  };
+
+  eventSource.onerror = function (err) {
+    console.error("⚠️ Lỗi SSE:", err);
+  };
+}
+
+function stopPlatesStream() {
+  if (eventSource) {
+    console.log("⛔ Dừng SSE");
+    eventSource.close();
+    eventSource = null;
+  }
+}
+
+// ======================== HÀM MNG_PLATES =========================
+async function mng_plates() {
+  // Nếu SSE đang bật, không cần gọi fetch nữa
+  if (eventSource) {
+    console.log("⚡ SSE đang hoạt động, không cần fetch.");
+    return;
+  }
+  startPlatesStream(); // bật SSE khi gọi mng_plates
+}
+
+// ======================== HIỂN THỊ DỮ LIỆU =========================
+function renderPlatesTable(data) {
+  const tableBody = document.getElementById("recentVehiclesTable");
+  if (!tableBody) return;
+  tableBody.innerHTML = "";
+
+  data.forEach((item, index) => {
+    const hasInfo =
+      (item.no_data && item.no_data.trim() !== "") ||
+      (item.note && item.note.trim() !== "");
+    let formattedTime = "";
+    if (item.time) {
+      try {
+        const timeAsUTC = item.time + "Z";
+        formattedTime = new Date(timeAsUTC).toLocaleString("vi-VN", {
+          timeZone: "Asia/Ho_Chi_Minh",
+          hour12: false,
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        });
+      } catch {
+        formattedTime = item.time;
+      }
+    }
+    createStatusBadge(item, index, formattedTime, hasInfo, tableBody);
+  });
+
+  document.querySelectorAll(".statue-select").forEach((select) => {
+    const value = select.value;
+    if (value === "vào") {
+      select.style.backgroundColor = "green";
+      select.style.color = "white";
+    } else if (value === "ra") {
+      select.style.backgroundColor = "red";
+      select.style.color = "white";
+    }
+  });
+
+  edit_home(0);
 }
 // Khởi tạo camera 1
 // Biến lưu trữ camera streams
@@ -162,6 +198,8 @@ function edit_home(sta) {
 
   editButtons.forEach((button) => {
     button.addEventListener("click", () => {
+      clearInterval(platesInterval);
+
       const row = button.closest("tr");
       const inputs = row.querySelectorAll(".edit_new,select.edit");
       const save_edits = row.querySelectorAll(".edit");
